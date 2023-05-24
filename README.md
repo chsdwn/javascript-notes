@@ -138,3 +138,48 @@ function test() {}
 test(); // TypeError: test is not a function
 var test = function() {};
 ```
+
+## 02. Code Quality
+
+### 03. Comments
+
+```js
+// Single-line
+
+/*
+ * Multiline
+ */
+
+/**
+ * Returns object of x and name.
+ * 
+ * @param {number} x - The number x
+ * @param {string} name - Your name
+ * @return {Object} An object of x and name
+ */
+const makeObj = (x, name) => ({ x, name });
+```
+
+### 06. Polyfills and Transpilers
+
+#### Transpilers
+
+- A transpiler is a special piece of software that translates code to another source code.
+- [Babel](https://babeljs.io/) is one of the most prominent transpiler.
+
+```js
+height = height ?? 100;
+
+height = (height !== undefined && height !== null) ? height : 100; // transpiled
+```
+
+#### Polyfills
+
+- A script that updates/adds new functions is called polyfill.
+- [core.js](https://github.com/zloirock/core-js) is one of the most popular polyfill library.
+
+```js
+if (!Math.trunc) {
+  Math.trunc = (num) => num < 0 ? Math.ceil(num) : Math.floor(num);
+}
+```
