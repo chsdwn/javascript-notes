@@ -424,7 +424,7 @@ const user = {
   [Symbol.toPrimitive](hint) {
     if (hint === "string") return this.name;
     if (hint === "number") return this.age;
-    if (hint === "default") return `{ "name": "Ali", "age": 20 }`;
+    if (hint === "default") return `{ "name": "${this.name}", "age": ${this.age} }`;
   }
 }
 
