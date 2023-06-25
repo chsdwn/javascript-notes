@@ -1462,3 +1462,272 @@ const meetup = JSON.parse(str, (key, value) => {
 
 meetup; // { "title": "Conference", "date": "2000-01-01T12:00:00.000Z" }
 ```
+
+## 05. Advanced Working with Functions
+
+### 02. Rest Parameters and Spread Syntax
+
+```js
+const sumAll = (...nums) => {
+  let sum = 0;
+  for (let num of nums) sum += num;
+  return sum;
+}
+sumAll(1, 2, 3); // 6
+```
+
+#### The `arguments` variable
+
+```js
+function sumAll() {
+  console.log(arguments) // { 0: 1, 1: 2, 2: 3, length: 3 }
+  console.log(arguments.length) // 3
+  console.log(arguments[0], arguments[1], arguments[2]) // 1, 2, 3
+
+  let sum = 0;
+  for (let num of arguments) sum += num;
+  return sum;
+}
+sumAll(1, 2, 3); // 6
+```
+
+### 03. Variable Scope, Closure
+
+- Closure: functions that remember their outer variables and can access them. They automatically remember where they were created using a hidden `[[Environment]]` property.
+
+#### Code blocks
+
+```js
+{
+  const name = "Ali";
+  console.log(name); // Ali
+}
+console.log(name); // Error: name is not defined
+
+const age = 20;
+const age = 30; // Error: Cannot redeclare block-scoped variable
+```
+
+#### Lexical environment
+
+- All functions remember the Lexical Environment in which they were made.
+
+```js
+// # global LexicalEnvironment --[outer]-> null #
+// - makeCounter: function
+// - counter: function
+function makeCounter() {
+  // # LexicalEnvironment of makeCounter() call --[outer]-> global
+  // - count: 0 (becomes 1 after seconds counter() call)
+  let count = 0;
+  return function() {
+    // # LexicalEnvironment: [[Environment]] --[outer]-> makeCounter()
+    // - <empty>
+    return count++;
+  }
+}
+
+const counter = makeCounter();
+console.log(counter()); // 0
+console.log(counter()); // 1
+```
+
+### 04. The Old `var`
+
+#### `var` has no block scope
+
+```js
+{
+  var name = "Ali";
+  console.log(name); // "Ali"
+}
+console.log(name); // "Ali"
+
+for (var i = 0; i < 3; i++) console.log(i) // 0, 1, 2
+console.log(i); // 3
+```
+
+#### `var` tolerates redeclarations
+
+```js
+var age = 20;
+var age = 30;
+console.log(age) // 30
+```
+
+#### `var` variables can declared below their use
+
+```js
+const greet = () => {
+  name = "Ali";
+
+  console.log(name, age); // "Ali" undefined
+
+  var name; // hoisted to the top of the function
+  var age = 20; // declarations are hoisted, but assignments are not
+}
+greet();
+```
+
+#### IIFE
+
+- Emulates block-level visibility for `var`.
+
+```js
+(function() {
+  var name = "Ali";
+  console.log(name); // "Ali"
+})();
+console.log(name); // Error: name is not defined
+
+(function() {
+  console.log("IIFE"); // "IIFE"
+}());
+!function() {
+  console.log("Bitwise"); // "Bitwise"
+}();
++function() {
+  console.log("Unary plus"); // "Unary plus"
+}();
+```
+
+### 06. Function Object, NFE
+
+#### The `name` property
+
+```js
+function sum() {}
+console.log(sum.name); // "sum"
+
+const greet = function() {}
+console.log(greet.name); // "greet"
+
+const farewell = () => {}
+console.log(farewell.name); // "farewell"
+
+function fn(callback = function() {}) {
+  console.log(callback.name); // "callback"
+}
+fn();
+
+const arr = [function() {}];
+console.log(arr[0].name); // [empty string]
+```
+
+#### The `length` property
+
+```js
+const a = (a1, ...rest) => {}
+console.log(a.length); // 1
+
+function b(a1, a2, ...rest) {}
+console.log(b.length); // 2
+```
+
+#### Custom properties
+
+```js
+const greet = () => {
+  greet.counter++;
+  return "Hi";
+}
+greet.counter = 0;
+
+console.log(greet()); // "Hi"
+console.log(greet()); // "Hi"
+console.log(greet.counter); // 2
+```
+
+#### Named Function Expression
+
+```js
+const greet = function print(name) {
+  if (name) {
+    console.log(name);
+  } else {
+    print("Ali");
+  }
+}
+greet(); // "Ali"
+greet("Veli"); // "Veli"
+```
+
+### 07. The `new Function` Syntax
+
+```js
+const sum = new Function("a", "b", "return a + b");
+console.log(sum(1, 2)); // 3
+
+const sum2 = new Function("a,b", "return a + b");
+console.log(sum2(1, 2)); // 3
+```
+
+### 09. Decorators and Forwarding, `call`/`apply`
+
+- Decorator: a special function that takes another function and alters its behavior.
+
+```js
+const worker = {
+  name: "worker",
+  process(size) {
+    console.log(`${this.name}.process(${size})`)
+    const arr = [];
+    for (let i = 0; i < size; i++) arr.push(i);
+    return arr;
+  }
+}
+
+const cachingDecorator = (fn) => {
+  const cache = new Map();
+  return function() {
+    // # Borrowing Array.join method
+    const key = [].join.apply(arguments, [","]);
+    if (cache.has(key)) return cache.get(key);
+
+    const result = fn.call(this, ...arguments);
+    cache.set(key, result);
+    return result;
+  }
+}
+
+worker.process = cachingDecorator(worker.process);
+worker.process(1000); // worker.process(1000)
+worker.process(1000);
+```
+
+#### Decorators and function properties
+
+- If the original function had properties on it, like `fn.calledCount`, then the decorated one will not provide them.
+
+### 10. Function Binding
+
+#### Losing `this`
+
+```js
+const veli = { name: "Veli" }
+const ali = {
+  name: "Ali",
+  greet() {
+    return { 
+      isGlobal: this === globalThis,
+      message: `Hi, ${this.name}!`
+    };
+  }
+}
+console.log(ali.greet()); // { isGlobal: false, message: "Hi, Ali!" }
+
+const greetAli = ali.greet;
+console.log(greetAli()); // { isGlobal: true, message: "Hi, undefined!" }
+
+const greetVeli = ali.greet.bind(veli);
+console.log(greetVeli()); // { isGlobal: false, message: "Hi, Veli!" }
+```
+
+#### Partial function
+
+```js
+const sum = (a, b) => a + b;
+
+const plusTwo = sum.bind(null, 2);
+console.log(plusTwo(3)); // 5
+```
