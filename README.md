@@ -497,7 +497,7 @@ zero && "zero is an object"; // "zero is an object"
 const num = 255;
 
 // base = 16: 0..9, A..F
-num.toString(16); // "255"
+num.toString(16); // "ff"
 
 // base = 2: 0, 1
 num.toString(2); // "11111111"
