@@ -502,7 +502,7 @@ zero && "zero is an object"; // "zero is an object"
 const num = 255;
 
 // base = 16: 0..9, A..F
-num.toString(16); // "255"
+num.toString(16); // "ff"
 
 // base = 2: 0, 1
 num.toString(2); // "11111111"
@@ -525,7 +525,7 @@ num.toString(2); // "11111111"
 ```js
 1e500; // Infinity
 
-0.1 + 0.2 = 0.3; // false
+0.1 + 0.2 === 0.3; // false
 
 0.1.toFixed(20); // "0.10000000000000000555"
 0.2.toFixed(20); // "0.20000000000000001110"
