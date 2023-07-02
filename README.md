@@ -5,10 +5,11 @@
 ### 05. Data Types
 
 ```js
-typeof null === "object";
-typeof undefined === "undefined";
-typeof function() {} === "function";
-typeof [] === "object";
+console.log(typeof null); // object
+console.log(typeof undefined); // undefined
+console.log(typeof void 0); // undefined
+console.log(typeof function() {}); // function
+console.log(typeof []); // object
 ```
 
 #### Primitives
@@ -24,6 +25,10 @@ typeof [] === "object";
 #### Non-Primitive
 
 - object: `{ a: 1 }`
+  - array: `[1, 2]`
+  - function: `function() {}`
+  - set: `new Set(["a", 1])`
+  - map: `new Map([["name", "Ali"]])`
 
 ### 07. Type Conversions
 
@@ -48,26 +53,26 @@ typeof [] === "object";
 - `===`: checks the equality without type conversion.
 
 ```js
-'Z' > 'A'; // 90 > 65 unicode comparison
-'2' > '1'; // 50 > 49 unicode comparison
-'Aa' > 'A';
+console.log('Z' > 'A'); // true, 90 > 65 unicode comparison
+console.log('2' > '1'); // true, 50 > 49 unicode comparison
+console.log('Aa' > 'A'); // true
 
-'2' > 1; // 2 > 1
-'01' == 1; // 1 == 1
+console.log('2' > 1); // true, 2 > 1
+console.log('01' == 1); // true, 1 == 1
 
-true == 1; // 1 == 1
-false == 0; // 0 == 0
-'' == false; // 0 == 0
+console.log(true == 1); // true, 1 == 1
+console.log(false == 0); // true, 0 == 0
+console.log('' == false); // true, 0 == 0
 
-null == undefined; // they equal each other, but not any other value.
+console.log(null == undefined); // true, they equal each other, but not any other value.
 
-null > 0; // 0 > 0
-null == 0;
-null >= 0; // 0 >= 0
+console.log(null == 0); // false
+console.log(null > 0); // false, 0 > 0
+console.log(null >= 0); // true, 0 >= 0
 
-undefined > 0; // NaN > 0
-undefined < 0; // NaN < 0
-undefined == 0;
+console.log(undefined > 0); // false, NaN > 0
+console.log(undefined < 0); // false, NaN < 0
+console.log(undefined == 0); // false
 ```
 
 ### 11. Logical Operators
@@ -75,41 +80,41 @@ undefined == 0;
 - The precedence of `&&` is higher than `||`
 
 ```js
-1 || 2 || 0; // 2
-undefined || 0 || null; // null
+console.log(0 || 2 || 1); // 2
+console.log(undefined || 0 || null); // null
 
-1 && 0 && 1; // 0
-1 && 2 && 3; // 3
+console.log(1 && 0 && 1); // 0
+console.log(1 && 2 && 3); // 3
 
-1 && 2 || 0 && 1; // (1 && 2) || (0 && 1) = 1 || 0 = 1
+console.log(1 && 2 || 0 && 1); // 2, (1 && 2) || (0 && 1) --> 2 || 0 = 2
 ```
 
 ### 12. Nullish Coalescing Operator
 
 ```js
-0 ?? 1; // 0 !== null && 0 !== undefined ? 0 : 1 = 0
+console.log(0 ?? 1); // 0, (0 !== null) && (0 !== undefined) ? 0 : 1 = 0
 
-null ?? 0; // 0
-undefined ?? 0; // 0
+console.log(null ?? 0); // 0
+console.log(undefined ?? 0); // 0
 
-1 && 2 || 3 ?? 4; // SyntaxError: Unexpected token '??'
+console.log(1 && 2 || 3 ?? 4); // SyntaxError: Unexpected token '??'
 ```
 
 ### 13. Loops `while` and `for`
 
 ```js
-for (let i = 0; i < 3; i++) i; // 0, 1, 2
-for (let i = 0; i < 3; ++i) i; // 0, 1, 2
+for (let i = 0; i < 3; i++) console.log(i); // 0, 1, 2
+for (let i = 0; i < 3; ++i) console.log(i); // 0, 1, 2
 ```
 
 ```js
 let i = 0;
-while (i < 3) i++; // 0, 1, 2
-i; // 3
+while (i < 3) console.log(i++); // 0, 1, 2
+console.log(i); // 3
 
 i = 0;
-while (i < 3) ++i; // 1, 2, 3
-i; // 3
+while (i < 3) console.log(++i); // 1, 2, 3
+console.log(i); // 3
 ```
 
 #### Labels for `break`, `continue`
