@@ -201,15 +201,19 @@ const obj = {
   "lorem ipsum": "lipsum",
   a: undefined,
 };
-obj[0]; // "zero"
-obj["0"]; // "zero"
+console.log(obj[0]); // "zero"
+console.log(obj["0"]); // "zero"
 
+console.log(obj.__proto__); // {}
 obj.__proto__ = 0; // Cannot be set to a non-object value;
+console.log(obj.__proto__); // {}
+obj.__proto__ = null; // Can be set to null;
+console.log(obj.__proto__); // undefined
 
-"lorem ipsum" in obj; // true
+console.log("lorem ipsum" in obj); // true
 
-obj.a; // undefined
-"a" in obj; // true
+console.log(obj.a); // undefined
+console.log("a" in obj); // true
 ```
 
 #### Property names limitations
@@ -220,7 +224,7 @@ const obj = {
   const: 2,
   return: 3,
 };
-obj.for + obj.const + obj.return; // 6
+console.log(obj.for + obj.const + obj.return); // 6
 ```
 
 #### The `for..in` loop
@@ -230,7 +234,7 @@ const user = {
   name: "Ali",
   age: 20,
 };
-for (const key in user) key; // name, age
+for (const key in user) console.log(key); // "name", "age"
 ```
 
 #### Ordered like an object
@@ -245,7 +249,7 @@ const numbers = {
   "six": 6,
   1: "one",
 };
-for (const num in numbers) num; // "1", "2", "3", "4", "5", "seven", "six"
+for (const num in numbers) console.log(num); // "1", "2", "3", "4", "5", "seven", "six"
 ```
 
 ### 02. Object References and Copying
@@ -274,6 +278,7 @@ const user = {
 user.me = user;
 
 const clonedUser = structuredClone(user);
+console.log(clonedUser); // { name: "Ali", age: 20, me: [Circular] }
 ```
 
 ```js
@@ -294,9 +299,9 @@ function greet() { return `Hi, ${this.name}`; }
 ali.greet = greet;
 veli.greet = greet;
 
-ali.greet(); // Hi, Ali
-veli.greet(); // Hi, Veli
-greet(); // this is undefined in strict mode
+console.log(ali.greet()); // "Hi, Ali"
+console.log(veli.greet()); // "Hi, Veli"
+console.log(greet()); // `this` is undefined in strict mode
 ```
 
 ### 05. Contructor, Operator `new`
@@ -309,8 +314,8 @@ function User(name) {
   this.age = 20;
 }
 const user = new User("Ali");
-user.name; // "Ali"
-user.age; // 20
+console.log(user.name); // "Ali"
+console.log(user.age); // 20
 ```
 
 #### Constructor mode test: `new.target`
@@ -331,7 +336,7 @@ function User() {
   this.name = "Ali";
   return { name: "Veli" }; // overrides `this`
 }
-new User().name; // "Veli"
+console.log(new User().name); // "Veli"
 ```
 
 ```js
@@ -339,7 +344,7 @@ function User() {
   this.name = "Ali";
   return;
 }
-new User().name; // "Ali"
+console.log(new User().name); // "Ali"
 ```
 
 ```js
@@ -349,8 +354,8 @@ const user = new User();
 // same as
 const user2 = new User;
 
-user.name; // "Ali"
-user2.name; // "Ali"
+console.log(user.name); // "Ali"
+console.log(user2.name); // "Ali"
 ```
 
 ### 06. Optional Chaining `?.`
@@ -366,10 +371,10 @@ obj.method?.(); // invokes method or undefined
 ```js
 const id = Symbol("id");
 const id2 = Symbol("id");
-id == id2; // false
+console.log(id == id2); // false
 
-id.toString(); // "Symbol(id)"
-id.description; // "id"
+console.log(id.toString()); // "Symbol(id)"
+console.log(id.description); // "id"
 ```
 
 #### Symbols are skipped by `for..in`
@@ -382,8 +387,8 @@ const user = {
   [id]: 123
 };
 
-for (const key in user) key; // name, age
-user[id]; // 123
+for (const key in user) console.log(key); // "name", "age"
+console.log(user[id]); // 123
 ```
 
 ```js
@@ -392,7 +397,7 @@ const user = { [id]: 123 };
 
 // `Object.assign` copies both string and symbol properties.
 const clonedUser = Object.assign({}, user);
-clonedUser[id]; // 123
+console.log(clonedUser[id]); // 123
 ```
 
 #### Global symbols
@@ -400,8 +405,8 @@ clonedUser[id]; // 123
 ```js
 const id = Symbol.for("id");
 const id2 = Symbol.for("id");
-id === id2; // true
-Symbol.keyFor(id); // "id"
+console.log(id === id2); // true
+console.log(Symbol.keyFor(id)); // "id"
 ```
 
 #### System symbols
@@ -433,10 +438,10 @@ const user = {
   }
 }
 
-String(user); // "Ali"
-Number(user); // 20
-user + ""; // "{ 'name': 'Ali', 'age': 20 }"
-user.toString(); // "[object Object]"
+console.log(String(user)); // "Ali"
+console.log(Number(user)); // 20
+console.log(user + ""); // "{ 'name': 'Ali', 'age': 20 }"
+console.log(user.toString()); // "[object Object]"
 ```
 
 #### `toString`, `valueOf`
@@ -447,21 +452,17 @@ const user = {
   age: 20,
 
   // hint === "string"
-  toString() {
-    return this.name;
-  },
+  toString() { return this.name; },
 
   // hint === "number || hint === "default"
-  valueOf() {
-    return this.age;
-  }
+  valueOf() { return this.age; }
 }
 
-user.toString(); // "Ali"
-String(user); // "Ali"
+console.log(user.toString()); // "Ali"
+console.log(String(user)); // "Ali"
 
-user.valueOf(); // 20
-user * 1; // 20
+console.log(user.valueOf()); // 20
+console.log(user * 1); // 20
 ```
 
 ## 04. Data Types
@@ -469,31 +470,34 @@ user * 1; // 20
 ### 01. Methods of Primitives
 
 ```js
-1..toFixed(2); // "1.00"
-"Ali".toLocaleUpperCase("tr"); // "ALİ"
+console.log(1..toFixed(2)); // "1.00"
+console.log("Ali".toLocaleUpperCase("tr")); // "ALİ"
 
-typeof 0; // "number"
-typeof new Number(0); // "object"
+console.log(typeof 0); // "number"
+console.log(typeof new Number(0)); // "object"
 
 const zero = new Number(0);
-zero && "zero is an object"; // "zero is an object"
+console.log(zero && "zero is an object"); // "zero is an object"
+
+const falseObj = new Boolean(false);
+console.log(falseObj && "falseObj is an object"); // "falseObj is an object"
 ```
 
 ### 02. Numbers
 
 ```js
-1_000_000_000 === 1e9; // true
-0.000_000_000_1 === 1e-10; // true
+console.log(1_000_000_000 === 1e9); // true
+console.log(0.000_000_000_1 === 1e-10); // true
 
 // Hexadecimal
-0xff === 255; // true
-0xFF === 255; // true
+console.log(0xff === 255); // true
+console.log(0xFF === 255); // true
 
 // Binary
-0b111_111_11 === 255; // true
+console.log(0b111_111_11 === 255); // true
 
 // Octal
-0o377 === 255; // true
+console.log(0o377 === 255); // true
 ```
 
 #### `toString(base)`
@@ -502,13 +506,13 @@ zero && "zero is an object"; // "zero is an object"
 const num = 255;
 
 // base = 16: 0..9, A..F
-num.toString(16); // "ff"
+console.log(num.toString(16)); // "ff"
 
 // base = 2: 0, 1
-num.toString(2); // "11111111"
+console.log(num.toString(2)); // "11111111"
 
 // base = 36(maximum): 0..9 A..Z
-123_456..toString(36); // "2n9c"
+console.log(123_456..toString(36)); // "2n9c"
 ```
 
 #### Rounding
@@ -523,36 +527,37 @@ num.toString(2); // "11111111"
 #### Imprecise calculations
 
 ```js
-1e500; // Infinity
+console.log(1e500); // Infinity
 
-0.1 + 0.2 === 0.3; // false
+console.log(0.1 + 0.2 === 0.3); // false
 
-0.1.toFixed(20); // "0.10000000000000000555"
-0.2.toFixed(20); // "0.20000000000000001110"
-0.3.toFixed(20); // "0.29999999999999998890"
-0.4.toFixed(20); // "0.40000000000000002220"
-0.5.toFixed(20); // "0.50000000000000000000"
-0.6.toFixed(20); // "0.59999999999999997780"
-0.7.toFixed(20); // "0.69999999999999995559"
-0.8.toFixed(20); // "0.80000000000000004441"
-0.9.toFixed(20); // "0.90000000000000002220"
+console.log(0.1.toFixed(20)); // "0.10000000000000000555"
+console.log(0.2.toFixed(20)); // "0.20000000000000001110"
+console.log(0.3.toFixed(20)); // "0.29999999999999998890"
+console.log(0.4.toFixed(20)); // "0.40000000000000002220"
+console.log(0.5.toFixed(20)); // "0.50000000000000000000"
+console.log(0.6.toFixed(20)); // "0.59999999999999997780"
+console.log(0.7.toFixed(20)); // "0.69999999999999995559"
+console.log(0.8.toFixed(20)); // "0.80000000000000004441"
+console.log(0.9.toFixed(20)); // "0.90000000000000002220"
 
-9_999_999_999_999_999; // 10000000000000000
+console.log(9_999_999_999_999_999); // 10000000000000000
 
--0 === 0; // true
+console.log(-0 === 0); // true
+console.log(Object.is(-0, 0)); // false
 ```
 
 #### Tests: `isFinite` and `isNaN`
 
 ```js
-isNaN(NaN); // true
-isNaN("str"); // true
+console.log(isNaN(NaN)); // true
+console.log(isNaN("str")); // true
 
-NaN === NaN; // false
+console.log(NaN === NaN); // false
 
-isFinite("15"); // true
-isFinite("str"); // false, value: NaN
-isFinite(Infinity); // false
+console.log(isFinite("15")); // true
+console.log(isFinite("str")); // false, value: NaN
+console.log(isFinite(Infinity)); // false
 ```
 
 - `Number.isNaN()` and `Number.isFinite()` do not autoconvert their argument into a number.
@@ -560,49 +565,49 @@ isFinite(Infinity); // false
 - `Number.isFinite(value)`: returns `true` if value belongs to the `number` type and it isn't `NaN`, `Infinity`, `-Infinity`.
 
 ```js
-Number.isNaN(NaN); // true
-Number.isNaN("str"); // false, because "str" is string
+console.log(Number.isNaN(NaN)); // true
+console.log(Number.isNaN("str")); // false, because "str" is string
 
-Number.isFinite(123); // true
-Number.isFinite(Infinity); // false
-Number.isFinite(2 / 0); // false
-Number.isFinite("15"); // false, because "15" is string
+console.log(Number.isFinite(123)); // true
+console.log(Number.isFinite(Infinity)); // false
+console.log(Number.isFinite(2 / 0)); // false
+console.log(Number.isFinite("15")); // false, because "15" is string
 ```
 
 ```js
-Object.is(NaN, NaN); // true
-NaN === NaN; // false
+console.log(Object.is(NaN, NaN)); // true
+console.log(NaN === NaN); // false
 
-Object.is(-0, 0); // false
--0 === 0; // true
+console.log(Object.is(-0, 0)); // false
+console.log(-0 === 0); // true
 ```
 
 #### `parseInt()` and `parseFloat()`
 
 ```js
-parseInt("100px"); // 100
-parseFloat("12.5em"); // 12.5
+console.log(parseInt("100px")); // 100
+console.log(parseFloat("12.5em")); // 12.5
 
-parseInt("12.3"); // 12.3
-parseFloat("12.3.4"); // 12.3
+console.log(parseInt("12.3")); // 12
+console.log(parseFloat("12.3.4")); // 12.3
 
-parseInt("a123"); // NaN
+console.log(parseInt("a123")); // NaN
 
 // parseInt(str, radix)
-parseInt("0xff", 16); // 255
-parseInt("ff", 16); // 255
-parseInt("2n9c", 36); // 123456
+console.log(parseInt("0xff", 16)); // 255
+console.log(parseInt("ff", 16)); // 255
+console.log(parseInt("2n9c", 36)); // 123456
 ```
 
 #### Other math functions
 
 ```js
-Math.random(); // [0, 1)
+console.log(Math.random()); // [0, 1)
 
-Math.max(3, 5, -10, 0, 1); // 5
-Math.min(1, 2); // 1
+console.log(Math.max(3, 5, -10, 0, 1)); // 5
+console.log(Math.min(1, 2)); // 1
 
-Math.pow(2, 10); // 2^10 = 1024
+console.log(Math.pow(2, 10)); // 1024, 2^10 = 1024
 ```
 
 ### 03. Strings
@@ -620,13 +625,13 @@ Math.pow(2, 10); // 2^10 = 1024
 ```js
 const name = "Ali";
 
-str[0]; // "A"
-str.at(0); // "A"
+console.log(name[0]); // "A"
+console.log(name.at(0)); // "A"
 
-str[str.length - 1]; // "i"
-str.at(-1); // "i"
+console.log(name[name.length - 1]); // "i"
+console.log(name.at(-1)); // "i"
 
-for (const char of name) char; // "A", "l", "i"
+for (const char of name) console.log(char); // "A", "l", "i"
 ```
 
 #### Searching for a substring
@@ -634,8 +639,8 @@ for (const char of name) char; // "A", "l", "i"
 ```js
 const str = "Widget with id";
 
-str.indexOf("id", 2); // 12
-str.lastIndexOf("id", 11); // 1
+console.log(str.indexOf("id", 2)); // 12
+console.log(str.lastIndexOf("id", 11)); // 1
 ```
 
 #### Getting a substring
@@ -644,41 +649,41 @@ str.lastIndexOf("id", 11); // 1
 const str = "stringify";
 
 // str.slice(start [, end]): allows negatives
-str.slice(2); // "ringify"
-str.slice(0, 5); // "strin"
-str.slice(-4, -1); // "gif"
+console.log(str.slice(2)); // "ringify"
+console.log(str.slice(0, 5)); // "strin"
+console.log(str.slice(-4, -1)); // "gif"
 
 // str.substring(start [, end]): converts negatives to 0
-str.substring(2, 6); // ring
-str.substring(6, 2); // ring
+console.log(str.substring(2, 6)); // ring
+console.log(str.substring(6, 2)); // ring
 
 // str.substr(start [, length]): allows negative start
-str.substr(2, 4); // ring
-str.substr(-4, 2); // gi
+console.log(str.substr(2, 4)); // ring
+console.log(str.substr(-4, 2)); // gi
 ```
 
 #### Comparing strings
 
 ```js
-"Z".codePointAt(0); // 90
-"z".codePointAt(0); // 122
+console.log("Z".codePointAt(0)); // 90
+console.log("z".codePointAt(0)); // 122
 
-String.fromCodePoint(90): // Z
-String.fromCodePoint(0x5a): // Z
+console.log(String.fromCodePoint(90)); // "Z"
+console.log(String.fromCodePoint(0x5a)); // "Z"
 
-"ö" > "z"; // true
-"ö".localeCompare("z", "tr"); // -1
+console.log("ö" > "z"); // true
+console.log("ö".localeCompare("z", "tr")); // -1
 ```
 
 ```js
-"a".repeat(3); // "aaa"
+console.log("a".repeat(3)); // "aaa"
 ```
 
 ### 04. Arrays
 
 - Get last element
 ```js
-[1, 2, 3].at(-1); // 3
+console.log([1, 2, 3].at(-1)); // 3
 ```
 
 #### Methods `pop`/`push` and `shift`/`unshift`
@@ -686,21 +691,21 @@ String.fromCodePoint(0x5a): // Z
 ```js
 const fruits = ["Apple", "Orange", "Pear"];
 
-// pop()
-const pear = fruits.pop(); // "Pear"
-fruits; // "Apple", "Orange"
+// pop(): returns popped item
+console.log(fruits.pop()); // "Pear"
+console.log(fruits); // ["Apple", "Orange"]
 
-// push(...items)
-const ananas = fruits.push("Ananas"); // "Ananas"
-fruits; // "Apple", "Orange", "Ananas"
+// push(...items): returns new length
+console.log(fruits.push("Ananas")); // 3
+console.log(fruits); // ["Apple", "Orange", "Ananas"]
 
-// shift()
-const apple = fruits.shift(); // "Apple"
-fruits; // "Orange", "Ananas"
+// shift(): returns shifted item
+console.log(fruits.shift()); // "Apple"
+fruits; // ["Orange", "Ananas"]
 
-// unshift(...items)
-const length = fruits.unshift("Watermelon"); // 3
-fruits; // "Watermelon", "Orange", "Ananas"
+// unshift(...items): returns new length
+console.log(fruits.unshift("Watermelon")); // 3
+console.log(fruits); // ["Watermelon", "Orange", "Ananas"]
 ```
 
 #### The ways to misuse an array
@@ -711,81 +716,91 @@ fruits; // "Watermelon", "Orange", "Ananas"
 #### A word about `length`
 
 ```js
-const arr = [1, 2, 3, 4, 5];
+const arr = [1, 2, 3, 4];
 
 arr.length = 2;
-arr; // [1, 2]
+console.log(arr); // [1, 2]
 
 arr.length = 5;
-arr; // [1, 2,,,]
+console.log(arr); // [1, 2, , , ]
 ```
 
 #### `new Array()`
 
 ```js
 const arr = new Array("Apple", "Orange");
+console.log(arr); // ["Apple", "Orange"]
 
 const arr2 = new Array(2);
-arr2[0]; // undefined
-arr2.length; // 2
+console.log(arr2); // [ , ]
+console.log(arr2.length); // 2
 ```
 
 #### `toString()`
 
 ```js
 const arr = [1, 2, 3];
-String(arr); // "1,2,3"
+console.log(String(arr)); // "1,2,3"
+console.log(arr.toString()); // "1,2,3"
 ```
 
 #### Don't compare arrays with `==`
 
 ```js
-[] == []; // false
-[0] == [0]; // false
+// comparison by reference
+console.log([] == []); // false
+console.log([0] == [0]); // false
 
-0 == []; // true, 0 == ""
-0 == [0]; // true, 0 == 0
-"0" == []; // false, "0" == ""
+console.log(Number([])); // 0
+console.log(Number([0])); // 0
+console.log(String([])); // ""
+console.log(String([0])); // "0"
+
+// comparison by value
+console.log(0 == []); // true, 0 == 0
+console.log(0 == [0]); // true, 0 == 0
+console.log("0" == []); // false, "0" == ""
+console.log("0" == [0]); // true, "0" == "0"
 ```
 
 ### 05. Array Methods
 
-#### `splice`
+#### `splice`: returns removed items
 
 ```js
 const arr = ["I", "go", "home"];
 
 delete arr[1];
-arr[1]; // undefined
-arr; // ["I", ,"home"]
-arr.length; // 3
+console.log(arr[1]); // undefined
+console.log(arr); // ["I", ,"home"]
+console.log(arr.length); // 3
 ```
 
 ```js
 // arr.splice(start [, deleteCount, elem1, ..., elemN])
 const arr = ["I", "go", "home"];
-const go = arr.splice(1, 1); // ["go"]
-arr; // ["I", "home"]
+console.log(arr.splice(1, 1)); // ["go"]
+console.log(arr); // ["I", "home"]
 ```
 
 ```js
 const arr = [1, 2, 5];
-arr.splice(-1, 0, 3, 4);
-arr; // [1, 2, 3, 4, 5]
+console.log(arr.splice(-1, 0, 3, 4)); // []
+console.log(arr); // [1, 2, 3, 4, 5]
 ```
 
-#### `slice`
+#### `slice`: returns sliced items
 
 ```js
 const arr = ["t", "e", "s", "t"];
-arr.slice(1, 3); // ["e", "s"]
-arr.slice(-2); // ["s", "t"]
+console.log(arr.slice(1, 3)); // ["e", "s"]
+console.log(arr.slice(-2)); // ["s", "t"]
 ```
 
 #### `concat`
 
 ```js
-[1, 2].concat([3, 4], 5, 6); // [1, 2, 3, 4, 5, 6]
+console.log([1, 2].concat([3, 4], 5, 6)); // [1, 2, 3, 4, 5, 6]
 ```
 
 ```js
@@ -795,16 +810,16 @@ const arr = {
   [Symbol.isConcatSpreadable]: true,
   length: 2,
 };
-[1, 2].concat(arr); // [1, 2, "a", "b"];
+console.log([1, 2].concat(arr)); // [1, 2, "a", "b"];
 ```
 
 #### Iterate: `forEach`
 
 ```js
 ["a", "b"].forEach((item, index, arr) => {
-  item; // "a", "b"
-  index; // 0, 1
-  arr; // ["a","b"], ["a","b"]
+  console.log(item); // "a", "b"
+  console.log(index); // 0, 1
+  console.log(arr); // ["a","b"], ["a","b"]
 });
 ```
 
@@ -813,158 +828,163 @@ const arr = {
 ```js
 const arr = [1, 0, false, 0, NaN];
 
-arr.indexOf(0); // 1
-arr.indexOf(2); // -1
-arr.lastIndexOf(0); // 3
+console.log(arr.indexOf(0)); // 1
+console.log(arr.indexOf(2)); // -1
+console.log(arr.lastIndexOf(0)); // 3
 
-arr.indexOf(NaN); // -1
-arr.includes(NaN); // true
+console.log(arr.indexOf(NaN)); // -1
+console.log(arr.includes(NaN)); // true
 ```
 
 #### `find` and `findIndex`/`findLastIndex`
 
 ```js
 ["a", "b"].find((item, index, arr) => {
-  item; // "a", "b"
-  index; // 0, 1
-  arr; // ["a","b"], ["a","b"]
+  console.log(item); // "a", "b"
+  console.log(index); // 0, 1
+  console.log(arr); // ["a","b"], ["a","b"]
 });
 ```
 
 ```js
 const users = [
- { id: 1, name: "Ali" },
- { id: 2, name: "Veli" },
- { id: 3, name: "Ali" },
+  { id: 1, name: "Ali" },
+  { id: 2, name: "Veli" },
+  { id: 3, name: "Ali" },
 ];
+ 
+console.log(users.find((u) => u.name === "Ali")); // { id: 1, name: "Ali" }
+console.log(users.find((u) => u.name === "Ahmet")); // undefined
 
-users.find((u) => u.name === "Ali"); // { id: 1, name: "Ali" }
-users.findIndex((u) => u.name === "Ali"); // 0
-users.findLastIndex((u) => u.name === "Ali"); // 2
+console.log(users.findIndex((u) => u.name === "Ali")); // 0
+console.log(users.findIndex((u) => u.name === "Ahmet")); // -1
+
+console.log(users.findLastIndex((u) => u.name === "Ali")); // 2
+console.log(users.findLastIndex((u) => u.name === "Ahmet")); // -1
 ```
 
 #### `filter`
 
 ```js
 ["a", "b"].filter((item, index, arr) => {
-  item; // "a", "b"
-  index; // 0, 1
-  arr; // ["a","b"], ["a","b"]
+  console.log(item); // "a", "b"
+  console.log(index); // 0, 1
+  console.log(arr); // ["a","b"], ["a","b"]
 });
 ```
 
 ```js
 const users = [
- { id: 1, name: "Ali" },
- { id: 2, name: "Veli" },
- { id: 3, name: "Ali" },
+  { id: 1, name: "Ali" },
+  { id: 2, name: "Veli" },
+  { id: 3, name: "Ali" },
 ];
-
-users.filter((u) => u.name === "Ali"); // [{ id: 1, name: "Ali" }, { id: 3, name: "Ali" }]
+ 
+console.log(users.filter((u) => u.name === "Ali")); // [{ id: 1, name: "Ali" }, { id: 3, name: "Ali" }]
 ```
 
 #### `map`
 
 ```js
 ["a", "b"].map((item, index, arr) => {
-  item; // "a", "b"
-  index; // 0, 1
-  arr; // ["a","b"], ["a","b"]
+  console.log(item); // "a", "b"
+  console.log(index); // 0, 1
+  console.log(arr); // ["a","b"], ["a","b"]
 });
 ```
 
 ```js
-[1, 2].map((num) => num * 2); // [2, 4]
+console.log([1, 2].map((num) => num * 2)); // [2, 4]
 ```
 
 #### `sort`
 
 ```js
 const arr = [1, 2, 15];
-arr.sort(); // Sorted by string
-arr; // [1, 15, 2];
+console.log(arr.sort()); // [1, 15, 2], Sorted by string
+console.log(arr); // [1, 15, 2]
 
-arr.sort((a, b) => a - b);
-arr; // [1, 2, 15];
+console.log(arr.sort((a, b) => a - b)); // [1, 2, 15]
+console.log(arr); // [1, 2, 15];
 ```
 
 ```js
 const arr = ["ö", "z", "a"];
-arr.sort();
-arr; // ["a", "z", "ö"]
+console.log(arr.sort()); // ["a", "z", "ö"]
+console.log(arr); // ["a", "z", "ö"]
 
-arr.sort((a, b) => a.localeCompare(b, "tr"));
-arr; // ["a", "ö", "z"]
+console.log(arr.sort((a, b) => a.localeCompare(b, "tr"))); // ["a", "ö", "z"]
+console.log(arr); // ["a", "ö", "z"]
 ```
 
 #### `reverse`
 
 ```js
 const arr = [1, 2, 3];
-arr.reverse();
-arr; // [3, 2, 1]
+console.log(arr.reverse()); // [3, 2, 1]
+console.log(arr); // [3, 2, 1]
 ```
 
 #### `split`
 
 ```js
-"1, 2, 3, 4".split(", ", 2); // ["1", "2"]
+console.log("1, 2, 3, 4".split(", ", 2));  // ["1", "2"]
 ```
 
 #### `reduce`/`reduceRight`
 
 ```js
 const sum = [1, 2, 3].reduce((accumulator, item, index, arr) => {
-  accumulator; // 0, 1, 3
-  item; // 1, 2, 3
-  index; // 0, 1, 2
-  arr; // [1,2,3], [1,2,3], [1,2,3]
+  console.log(accumulator); // 0, 1, 3
+  console.log(item); // 1, 2, 3
+  console.log(index); // 0, 1, 2
+  console.log(arr); // [1, 2, 3], [1, 2, 3], [1, 2, 3]
   return accumulator + item;
 }, 0);
-sum; // 6
+console.log(sum); // 6
 ```
 
 #### `some`/`every`
 
 ```js
-[1, 2, 3].some((num) => num % 2 === 0); // true
-[1, 2, 3].every((num) => num % 2 === 0); // false
+console.log([1, 2, 3].some((num) => num % 2 === 0)); // true
+console.log([1, 2, 3].every((num) => num % 2 === 0)); // false
 ```
 
 #### `fill`
 
 ```js
-[1, 2, 3].fill("a", 1, 1); // [1, "a", 2]
+console.log([1, 2, 3].fill("a", 1, 2)); // [1, "a", 2]
 ```
 
 #### `copyWithin`
 
 ```js
 const arr = ["a", "b", "c", "d", "e"];
-arr.copyWithin(0, 3, 5); // copy ["d", "e"] to index 0
-arr; // ["d", "e", "c", "d", "e"]
+console.log(arr.copyWithin(0, 3, 5)); // ["d", "e", "c", "d", "e"], copy ["d", "e"] to index 0
+console.log(arr); // ["d", "e", "c", "d", "e"]
 ```
 
 #### `flat`/`flatMap`
 
 ```js
-[1, 2, [3, 4]].flat(); // [1, 2, 3, 4]
-[1, 2, [3, 4, [5, 6]]].flat(2); // [1, 2, 3, 4, 5, 6]
-[1, 2, [3, 4, [5, 6, [7, 8, [9, 10]]]]].flat(Infinity); // [1,2,3,4,5,6,7,8,9,10]
+console.log([1, 2, [3, 4]].flat()); // [1, 2, 3, 4]
+console.log([1, 2, [3, 4, [5, 6]]].flat(2)); // [1, 2, 3, 4, 5, 6]
+console.log([1, 2, [3, 4, [5, 6, [7, 8, [9, 10]]]]].flat(Infinity)); // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 ```
 
 ```js
-[1, 2, 3].flatMap((num) => Array(num).fill(num)); // [1, 2, 2, 3, 3, 3]
+console.log([1, 2, 3].flatMap((num) => Array(num).fill(num))); // [1, 2, 2, 3, 3, 3]
 ```
 
 #### `Array.isArray`
 
 ```js
-typeof {}; // "object"
-typeof []; // "object"
+console.log(typeof {}); // "object"
+console.log(typeof []); // "object"
 
-Array.isArray({}); // false
-Array.isArray([]); // true
+console.log(Array.isArray({})); // false
+console.log(Array.isArray([])); // true
 ```
 
 #### Most methods support `thisArg`
@@ -995,7 +1015,7 @@ const users = [
 ];
 
 const soldiers = users.filter((user) => army.canJoin(user), army);
-soldiers; // [{ age: 20 }, { age: 23 }]
+console.log(soldiers); // [{ age: 20 }, { age: 23 }]
 ```
 
 ### 06. Iterables
@@ -1018,17 +1038,18 @@ const range = {
   },
 };
 
-for (const num of range) num; // 1, 2, 3
+console.log(range[Symbol.iterator]().next()); // { done: false, value: 1 }
+for (const num of range) console.log(num); // 1, 2, 3
 ```
 
 #### String is iterable
 
 ```js
 const str = "𝒳😂";
-for (const char of str) char; // "𝒳", "😂"
+for (const char of str) console.log(char); // "𝒳", "😂"
 
-str.length; // 4
-str.charCodeAt(0); // 55349
+console.log(str.length); // 4
+console.log(str.charCodeAt(0)); // 55349
 ```
 
 #### Calling an iterator explicitly
@@ -1039,7 +1060,7 @@ const iterator = str[Symbol.iterator]();
 while(true) {
   const res = iterator.next();
   if (res.done) break;
-  res.value; // "H", "e", "l", "l", "o"
+  console.log(res.value); // "H", "e", "l", "l", "o"
 }
 ```
 
@@ -1069,7 +1090,7 @@ const arrayLike = {
 };
 
 const arr = Array.from(arrayLike);
-arr; // ["a", "b"]
+console.log(arr); // ["a", "b"]
 ```
 
 ```js
@@ -1087,22 +1108,22 @@ const iterable = {
 };
 
 const arr = Array.from(iterable, (num) => num * num);
-arr; // [1, 4, 9]
+console.log(arr); // [1, 4, 9]
 ```
 
 ```js
 const str = "𝒳😂";
-str.length; // 4
+console.log(str.length); // 4
 
 const chars = Array.from(str);
-chars.length; // 2
-chars[0]; // "𝒳"
-chars[1]; // "😂"
+console.log(chars.length); // 2
+console.log(chars[0]); // "𝒳"
+console.log(chars[1]); // "😂"
 
-for (const char of str) char; // "𝒳", "😂"
+for (const char of str) console.log(char); // "𝒳", "😂"
 
-str.slice(1, 3); // "##" (two pieces from different surrogate pairs)
-str.slice(0, 2); // "𝒳"
+console.log(str.slice(1, 3)); // "##" (two pieces from different surrogate pairs)
+console.log(str.slice(0, 2)); // "𝒳"
 ```
 
 ### 07. Map and Set
@@ -1122,32 +1143,31 @@ str.slice(0, 2); // "𝒳"
 
 ```js
 const map = new Map();
-
 map
   .set("1", "abc")
   .set(1, 123);
 
-map.get("1"); // "abc"
-map.get(1); // 123
+console.log(map.get("1")); // "abc"
+console.log(map.get(1)); // 123
 
 const obj = { name: "Ali" };
-map.set(obj, 20);
-map.get(obj); // 20
+console.log(map.set(obj, 20)); // Map { "1" => "abc", 1 => 123, { name: "Ali" } => 20 }
+console.log(map.get(obj)); // 20
 
-map.keys().next().value; // "1"
-map.values().next().value; // "abc"
-map.entries().next().value; // ["1", "abc"]
+console.log(map.keys().next().value); // "1"
+console.log(map.values().next().value); // "abc"
+console.log(map.entries().next().value); // ["1", "abc"]
 
 for (const [key, value] of map) {
-  key; // "1", 1, { name: "Ali" }
-  value; // "abc", 123, 20
+  console.log(key); // "1", 1, { name: "Ali" }
+  console.log(value); // "abc", 123, 20
 }
 
 map.forEach((value, key, map) => {
-  key; // "1", 1, { name: "Ali" }
-  value; // "abc", 123, 20
-  map.size; // 3, 3, 3
-})
+  console.log(key); // "1", 1, { name: "Ali" }
+  console.log(value); // "abc", 123, 20
+  console.log(map.size); // 3, 3, 3
+});
 ```
 
 #### `Object.entries`: `Map` from `Object`
@@ -1158,6 +1178,7 @@ const map = new Map([
   [1, 123],
   [true, false],
 ]);
+console.log(map); // Map { "1" => "abc", 1 => 123, true => false }
 ```
 
 ```js
@@ -1167,14 +1188,14 @@ const obj = {
 };
 
 const map = new Map(Object.entries(obj));
-map.get("name"); // "Ali"
-map.get("age"); // 20
+console.log(map.get("name")); // "Ali"
+console.log(map.get("age")); // 20
 ```
 
 ```js
 const map = new Map([["a", 1], ["b", 2]])
 const obj = Object.fromEntries(map); // omit .entries()
-obj; // { "a": 1, "b": 2 }
+console.log(obj); // { a: 1, b: 2 }
 ```
 
 #### Set
@@ -1199,26 +1220,26 @@ set.add(ali);
 set.add(veli);
 set.add(ali);
 
-set.size; // 2
+console.log(set.size); // 2
 ```
 
 #### Iteration over `Set`
 
 ```js
 const set = new Set(["a", "b", "c"]);
-set; // { "a", "b", "c" }
+console.log(set); // Set { "a", "b", "c" }
 
-for (const char of set) char; // "a", "b", "c"
+for (const char of set) console.log(char); // "a", "b", "c"
 
 set.forEach((value, valueAgain, set) => {
-  value; // "a", "b", "c"
-  valueAgain; // "a", "b", "c"
-  set; // { "a", "b", "c" }, { "a", "b", "c" }, { "a", "b", "c" }
+  console.log(value); // "a", "b", "c"
+  console.log(valueAgain); // "a", "b", "c"
+  console.log(set); // Set { "a", "b", "c" }, Set { "a", "b", "c" }, Set { "a", "b", "c" }
 });
 
-set.keys().next().value; // "a"
-set.value().next().value; // "a"
-set.entries().next().value; // ["a", "a"]
+console.log(set.keys().next().value); // "a"
+console.log(set.values().next().value); // "a"
+console.log(set.entries().next().value); // ["a", "a"]
 ```
 
 ### 08. WeakMap and WeakSet
@@ -1228,13 +1249,13 @@ set.entries().next().value; // ["a", "a"]
 - `WeakMap` keys must be objects, not primitive values.
 
 ```js
-const ali = { name: "Ali" };
+let ali = { name: "Ali" };
 
 const weakMap = new WeakMap();
 weakMap.set(ali, 20);
 
-ali = null;
-// ali is removed from memory
+ali = null; // ali is removed from memory
+console.log(weakMap.get(ali)); // undefined
 ```
 
 ##### Methods and properties:
@@ -1248,13 +1269,13 @@ ali = null;
 ```js
 const weakSet = new WeakSet();
 
-const ali = { name: "Ali" };
+let ali = { name: "Ali" };
 
 weakSet.add(ali);
-weakSet.has(ali); // true
+console.log(weakSet.has(ali)); // true
 
-ali = null;
-// ali is removed from memory
+ali = null; // ali is removed from memory
+console.log(weakSet.has(ali)); // false
 ```
 
 ##### Methods and properties:
@@ -1272,9 +1293,9 @@ const obj = {
   age: 20,
 };
 
-Object.keys(obj); // ["name", "age"]
-Object.values(obj); // ["Ali", 20]
-Object.entries(obj); // [["name", "Ali"], ["age", 20]]
+console.log(Object.keys(obj)); // ["name", "age"]
+console.log(Object.values(obj)); // ["Ali", 20]
+console.log(Object.entries(obj)); // [["name", "Ali"], ["age", 20]]
 ```
 
 #### Transforming objects
@@ -1289,7 +1310,7 @@ const prices = {
 const doublePrices = Object.fromEntries(
   Object.entries(prices).map(([key, value]) => [key, value * 2])
 );
-doublePrices; // { "banana": 2, "orange": 4, "apple": 8 }
+console.log(doublePrices); // { banana: 2, orange: 4, apple: 8 }
 ```
 
 ### 10. Destructuring Assignment
@@ -1317,8 +1338,8 @@ const greet = ({ name = "Ali" } = {}) => {}
 const Jan01_1970 = new Date(0);
 const Dec31_1969 = new Date(-24 * 60 * 60);
 
-new Date("2000-01-31"); // 31 Jan 2000
-new Date(2000, 0, 1, 0, 0, 0); // 1 Jan 2000, 00:00:00
+console.log(new Date("2000-01-31")); // 31 Jan 2000
+console.log(new Date(2000, 0, 1, 0, 0, 0)); // 1 Jan 2000, 00:00:00
 ```
 
 #### Access date components
@@ -1348,8 +1369,10 @@ new Date(2000, 0, 1, 0, 0, 0); // 1 Jan 2000, 00:00:00
 #### Autocorrection
 
 ```js
-const date = new Date(2000, 0, 32); // 1 Feb 2000
-date.setDate(-3); // 28 Jan 2000
+const date = new Date(2000, 0, 32);
+console.log(date); // 1 Feb 2000
+date.setDate(-3);
+console.log(date); // 28 Jan 2000
 ```
 
 #### `Date.now()`
@@ -1368,7 +1391,7 @@ const ms = Date.now(); // milliseconds count from 1 Jan 1970
 
 ```js
 const ms = Date.parse("2000-01-13T15:45:59.865+03:00");
-ms; // 947767559865
+console.log(ms); // 947767559865
 ```
 
 ### 12. JSON Methods, toJSON
@@ -1405,7 +1428,7 @@ const user = {
   something: undefined,
 };
 
-JSON.stringify(user); // "{}"
+console.log(JSON.stringify(user)); // "{}"
 ```
 
 - No circular references.
@@ -1431,7 +1454,7 @@ const meetup = {
   space: 40
 };
 
-JSON.stringify(meetup, ["title", "participants", "name"], 4);
+console.log(JSON.stringify(meetup, ["title", "participants", "name"], 4));
 /*
 {
     "title": "Conference",
@@ -1450,7 +1473,7 @@ const room = {
   },
 };
 
-JSON.stringify(room); // 42
+console.log(JSON.stringify(room)); // 42
 ```
 
 #### `JSON.parse`
@@ -1458,14 +1481,14 @@ JSON.stringify(room); // 42
 - `JSON.parse(str, [revier])`
 
 ```js
-let str = '{"title":"Conference","date":"2000-01-01T12:00:00.000Z"}';
+const str = '{"title":"Conference","date":"2000-01-01T12:00:00.000Z"}';
 
 const meetup = JSON.parse(str, (key, value) => {
   if (key === "date") return new Date(value);
   return value;
 });
 
-meetup; // { "title": "Conference", "date": "2000-01-01T12:00:00.000Z" }
+console.log(meetup); // { title: "Conference", date: "2000-01-01T12:00:00.000Z" }
 ```
 
 ## 05. Advanced Working with Functions
@@ -1478,7 +1501,7 @@ const sumAll = (...nums) => {
   for (let num of nums) sum += num;
   return sum;
 }
-sumAll(1, 2, 3); // 6
+console.log(sumAll(1, 2, 3)); // 6
 ```
 
 #### The `arguments` variable
@@ -1493,7 +1516,7 @@ function sumAll() {
   for (let num of arguments) sum += num;
   return sum;
 }
-sumAll(1, 2, 3); // 6
+console.log(sumAll(1, 2, 3)); // 6
 ```
 
 ### 03. Variable Scope, Closure
