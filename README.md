@@ -1759,3 +1759,141 @@ const sum = (a, b) => a + b;
 const plusTwo = sum.bind(null, 2);
 console.log(plusTwo(3)); // 5
 ```
+
+## 06. Object Properties Configuration
+
+### 01. Property Flags and Descriptors
+
+#### Property flags
+
+- `writable`: if `true`, the value can be changed.
+- `enumerable`: if `true`, then listed in loops.
+- `configurable`: if `true`, the property can be deleted and these attributes can be modified.
+
+```js
+const user = { name: "Ali" };
+
+console.log(Object.getOwnPropertyDescriptor(user, "name"));
+// { value: "Ali", writable: true, enumerable: true, configurable: true }
+
+Object.defineProperty(user, "age", { value: 20 });
+console.log(Object.getOwnPropertyDescriptor(user, "age"));
+// { value: 20, writable: false, enumerable: false, configurable: false }
+
+// # Non-writable: { writable: false }
+user.age = 30;
+console.log(user.age); // 20
+
+// # Non-enumerable: { enumerable: false }
+console.log(user); // { name: "Ali" }
+
+// # Non-configurable: { configurable: false }
+Object.defineProperty(user, "age", { writable: true }); // Error: Cannot redefine property: age
+```
+
+#### Non-configurable
+
+- `writable: true` can be changed to `false` for a non-configurable object.
+
+#### `Object.defineProperties`
+
+```js
+const user = {};
+Object.defineProperties(user, {
+  name: { value: "Ali", configurable: true },
+  age: { value: 20, enumerable: true }, 
+});
+```
+
+#### `Object.getOwnPropertyDescriptors`
+
+```js
+const user = {};
+Object.defineProperties(user, {
+  name: { value: "Ali", writable: true, enumerable: true, configurable: true },
+  age: { value: 20 }, 
+});
+
+const clone = Object.defineProperties({}, Object.getOwnPropertyDescriptors(user));
+console.log(Object.getOwnPropertyDescriptors(clone));
+/*
+{
+  name: { value: 'Ali', writable: true, enumerable: true, configurable: true },
+  age: { value: 20, writable: false, enumerable: false, configurable: false }
+}
+*/
+```
+
+#### Sealing an object globally
+
+- `Object.preventExtensions(obj)`: forbids the addition of new properties to the object.
+- `Object.seal(obj)`: sets `configurable: false` for all existing properties.
+- `Object.freeze(obj)`: sets `writable: false, configurable: false` for all existing properties.
+- `Object.isExtensible(obj)`
+- `Object.isSealed(obj)`
+- `Object.isFrozen(obj)`
+
+### 02. Property Getters and Setters
+
+```js
+const user = {
+  name: "Ali",
+  surname: "Veli",
+
+  get fullName() {
+    return `${this.name} ${this.surname}`;
+  },
+
+  set fullName(value) {
+    [this.name, this.surname] = value.split(" ");
+  },
+};
+
+user.fullName = "Ahmet Mehmet";
+console.log(user.fullName); // "Ahmet Mehmet"
+```
+
+#### Ancestor descriptors
+
+- `get`: works when a property is read.
+- `set`: called when the property is set.
+- `enumerable`
+- `configurable`
+
+```js
+const user = {
+  name: "Ali",
+  surname: "Veli",
+};
+Object.defineProperty(user, "fullName", {
+  get() {
+    return `${this.name} ${this.surname}`;
+  },
+  set(value) {
+    [this.name, this.surname] = value.split(" ");
+  },
+});
+
+user.fullName = "Ahmet Mehmet";
+console.log(user.fullName); // "Ahmet Mehmet"
+for (const key in user) console.log(key); // "name", "surname"
+```
+
+#### User for compatibility
+
+```js
+function User(name, birthday) {
+  this.name = name;
+  this.birthday = birthday;
+
+  Object.defineProperty(this, "age", {
+    get() {
+      const year = new Date().getFullYear();
+      return year - this.birthday.getFullYear();
+    },
+  });
+}
+
+const ali = new User("Ali", new Date(2000, 0, 1));
+console.log(ali.age); // 23
+```
