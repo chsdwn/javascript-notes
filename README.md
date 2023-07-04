@@ -1897,3 +1897,177 @@ function User(name, birthday) {
 const ali = new User("Ali", new Date(2000, 0, 1));
 console.log(ali.age); // 23
 ```
+
+## 07. Prototypes, Inheritance
+
+### 01. Prototypal Inheritance
+
+#### `[[Prototype]]`
+
+- Objects have a special hidden property `[[Prototype]]`, that is either `null` or references anothor object.
+- The `__proto__` property is outdated. Use `Object.getPrototypeOf/Object.setPrototypeOf` functions instead.
+
+```js
+const user = { age: 20 };
+const ali = {
+  __proto__: user,
+  name: "Ali",
+};
+
+console.log(ali.age); // 20
+
+// # Writing doesn't use prototype
+ali.age = 30;
+console.log(ali.age); // 30
+console.log(user.age); // 20
+```
+
+#### The value of `this`
+
+- `this` is always the object before dot.
+
+#### `for..in` loop
+
+```js
+const user = { age: 20 };
+const ali = {
+  __proto__: user,
+  name: "Ali",
+};
+
+console.log(Object.keys(ali)); // ["name"]
+for (const key in ali) {
+  if (ali.hasOwnProperty(key)) {
+    console.log(key); // "name"
+  } else {
+    console.log(key); // "age"
+  }
+}
+```
+
+### 02. F.prototype
+
+- If `F.prototype` is an object, then the `new` operator uses it to set `[[Prototype]]` for the new object.
+
+```js
+const user = { age: 20 };
+function Admin(name) {
+  this.name = name;
+}
+
+Admin.prototype = user;
+
+const ali = new Admin("Ali");
+console.log(ali.__proto__ === user); // true
+console.log(ali.age); // 20
+```
+
+#### Default F.prototype, constructor property
+
+```js
+function Admin() {}
+// Admin.prototype = { constructor: Admin }
+
+const ali = new Admin();
+console.log(ali.__proto__.constructor); // Admin
+console.log(ali.constructor === Admin); // true
+
+const veli = new ali.constructor();
+
+// # JavaScript itself does not ensure the right `constructor` value. 
+function User() {}
+User.prototype = { age: 20 };
+
+const ahmet = new User();
+console.log(ahmet.constructor === User); // false
+```
+
+### 03. Native Prototypes
+
+#### `Object.prototype`
+
+```js
+const obj = {};
+console.log(obj.__proto__ === Object.prototype); // true
+console.log(obj.toString === obj.__proto__.toString); // true
+console.log(obj.toString === Object.prototype.toString); // true
+
+console.log(Object.prototype.__proto__); // null
+```
+
+#### Other built-in prototypes
+
+```js
+const arr = [1, 2, 3];
+console.log(arr.__proto__ === Array.prototype); // true
+console.log(arr.__proto__.__proto__ === Object.prototype); // true
+console.log(arr.__proto__.__proto__.__proto__); // null
+
+console.log(arr.toString()); // "1,2,3", Array.prototype.toString() 
+```
+```js
+const f = () => {};
+console.log(f.__proto__ === Function.prototype); // true
+console.log(f.__proto__.__proto__ === Object.prototype); // true
+```
+
+#### Primitives
+
+- `null` and `undefined` have no object wrappers.
+
+#### Changing native prototypes
+
+```js
+Object.defineProperty(Number.prototype, "isEven", {
+  get() {
+    return this % 2 === 0;
+  },
+});
+
+console.log(2..isEven); // true
+console.log(3..isEven); // false
+```
+
+#### Borrowing from prototypes
+
+```js
+const user = {
+  0: "Ali",
+  1: "Veli",
+  length: 2,
+};
+
+user.join = Array.prototype.join;
+console.log(user.join(" ")); // "Ali Veli"
+```
+
+### 04. Prototype Methods, Objects Without `__proto__`
+
+```js
+const user = { age: 20 };
+const ali = Object.create(user, { 
+  name: { value: "Ali", writable: true, enumerable: true, configurable: true },
+}); // { __proto__: user, name: "Ali" }
+
+console.log(ali.__proto__ === user); // true
+console.log(Object.getPrototypeOf(ali) === user); // true
+
+Object.setPrototypeOf(ali, null);
+console.log(ali.__proto__); // undefined
+console.log(Object.getPrototypeOf(ali)); // null
+```
+```js
+const clone = Object.create(
+  Object.getPrototypeOf(obj),
+  Object.getOwnPropertyDescriptors(obj)
+);
+```
+
+#### Very plain objects
+
+```js
+const obj = Object.create(null);
+obj.__proto__ = "Ali Veli";
+console.log(obj.__proto__); // "Ali Veli"
+console.log(obj.toString()); // Error: obj.toString is not a function
+```
