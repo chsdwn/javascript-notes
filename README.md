@@ -2071,3 +2071,119 @@ obj.__proto__ = "Ali Veli";
 console.log(obj.__proto__); // "Ali Veli"
 console.log(obj.toString()); // Error: obj.toString is not a function
 ```
+
+## 08. Classes
+
+### 01. Class Basic Syntax
+
+#### What is a `class`?
+
+```js
+class User {
+  constructor(name) {
+    this.name = name;
+  }
+
+  greet() {
+    return `Hi, ${this.name}!`;
+  }
+}
+console.log(typeof User); // "function"
+console.log(User === User.prototype.constructor); // true
+console.log(Object.getOwnPropertyNames(User.prototype)); // ["constructor", "greet"]
+
+const ali = new User("Ali");
+console.log(Object.getOwnPropertyNames(ali)); // ["name"]
+console.log(ali.__proto__ === User.prototype); // true
+```
+
+#### Not a just syntactic sugar
+
+1. `class` is labelled by a special internal property `[[IsClassConstructor]]`.
+1. Class methods are non-enumerable.
+1. Classes always `use strict`.
+
+```js
+class User {}
+console.log(typeof User); // "function"
+console.log(User.toString()); // "class User { }"
+
+User(); // Error: cannot be invoked without `new`
+```
+
+#### Class expression
+
+```js
+const User = class {}
+
+const Admin = class AdminClass {}
+
+function makeClass(name) {
+  return class {
+    greet() {
+      return `Hi, ${name}!`;
+    }
+  }
+}
+const Ali = makeClass("Ali");
+console.log(new Ali().greet()); // "Hi, Ali!"
+```
+
+#### Getters/setters
+
+```js
+class User {
+  constructor(name) {
+    this.name = name;
+  }
+
+  get name() {
+    return `name: ${this._name}`;
+  }
+
+  set name(value) {
+    if (value.length < 3) {
+      console.log("Short name");
+      return;
+    }
+    this._name = value;
+  }
+}
+
+const ali = new User("Ali");
+console.log(ali.name); // "name: Ali"
+
+new User(""); // "Short name"
+```
+
+#### Computed names
+
+```js
+class User {
+  ["greet" + "Me"]() {
+    return "Hi!";
+  }
+}
+
+console.log(new User().greetMe()); // "Hi!"
+```
+
+#### Class fields
+
+- Class fields are set on individual objects, not `Obj.prototype`.
+
+```js
+class User {
+  name = "Ali"
+
+  // # Making bound methods with class fields
+  greet = () => {
+    console.log(`Hi, ${this.name}!`);
+  }
+}
+console.log(Object.getOwnPropertyNames(User.prototype)); // ["constructor"]
+
+const ali = new User();
+console.log(Object.getOwnPropertyNames(ali)); // ["name", "greet"]
+setTimeout(ali.greet, 0); // "Hi, Ali!"
+```
