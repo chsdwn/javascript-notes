@@ -2187,3 +2187,172 @@ const ali = new User();
 console.log(Object.getOwnPropertyNames(ali)); // ["name", "greet"]
 setTimeout(ali.greet, 0); // "Hi, Ali!"
 ```
+
+### 02. Class Inheritance
+
+```js
+class User {
+  constructor(name) {
+    this.name = name;
+  }
+  
+  greet() {
+    return `Hi, ${this.name}!`;
+  }
+}
+
+// Admin.prototype.[[Prototype]] = User.prototype
+class Admin extends User {
+  giveAccess() {
+    return `${this.name}: granted`;
+  }
+}
+console.log(Admin.prototype.__proto__ === User.prototype); // true
+
+const ali = new Admin("Ali");
+console.log(ali.greet()); // "Hi, Ali!"
+console.log(ali.giveAccess()); // "Ali: granted"
+```
+
+- Any expression is allowed after `extends`
+
+```js
+function f(name) {
+  return class {
+    greet() {
+      return `Hi, ${name}`;
+    }
+  }
+}
+
+class User extends f("Ali") {}
+console.log(new User().greet()); // "Hi, Ali!"
+```
+
+#### Overriding a method
+
+- Arrow functions don't override `super`.
+
+```js
+class User {
+  constructor(name) {
+    this.name = name;
+  }
+
+  greet() {
+    return `Hi, ${this.name}!`;
+  }
+}
+
+class Admin extends User {
+  greet() {
+    return `${super.greet()} You're Admin.`;
+  }
+}
+
+const ali = new Admin("Ali");
+console.log(ali.greet()); // "Hi, Ali! You're Admin."
+```
+
+#### Overriding `constructor`
+
+  - A derived constructor has a special internal property `[[ConstructorKind]]: "derived"`.
+  - A derived constructor must call `super` in order to execute its parent constructor, otherwise the object for `this` won't be created.
+
+```js
+class User {}
+
+class Admin extends User {
+  constructor(name) {
+    // super(); // uncomment this line to get rid of the error
+    this.name = name;
+  }
+}
+
+new Admin("Ali"); // Error: Must call super constructor in derived class before accessing 'this' or returning from derived constructor
+```
+
+#### Overriding class fields
+
+- The parent constructor always uses its own field value.
+- The class field initialized before constructor for the base class and after `super()` for the derived class.
+
+```js
+class User {
+  name = "Ali";
+
+  constructor() {
+    console.log(this.name);
+    this.greet();
+  }
+
+  greet() {
+    console.log(`Hi, Ali!`);
+  }
+}
+
+class Admin extends User {
+  name = "Veli";
+
+  greet() {
+    console.log(`Hi, Veli!`);
+  }
+}
+
+console.log(new User()); // "Ali", "Hi, Ali!"
+console.log(new Admin()); // "Ali", "Hi, Veli!"
+```
+
+#### `[[HomeObject]]`
+
+- `[[HomeObject]]` is defined for methods both in classes and in plaing objects.
+
+```js
+const user = {
+  name: "User",
+  greet() { // user.greet.[[HomeObject]] = user
+    return `Hi, ${this.name}!`;
+  },
+};
+
+const admin = {
+  __proto__: user,
+  name: "Admin",
+  greet() { // admin.greet.[[HomeObject]] = admin
+    return super.greet();
+  },
+};
+
+console.log(admin.greet()); // "Hi, Admin!"
+```
+
+#### Methods are not free
+
+- `[[HomeObject]]` cannot be changed.
+
+```js
+const user = {
+  greet() {
+    return "User";
+  },
+};
+const admin = {
+  __proto__: user,
+  greet() { // admin.greet.[[HomeObject]] = admin
+    return super.greet();
+  },
+};
+
+const animal = {
+  greet() {
+    return "Animal";
+  },
+};
+const puma = {
+  __proto__: animal,
+  greet: admin.greet
+};
+
+// It shows "user" because its copied from admin.
+console.log(puma.greet()); // "User"
+```
