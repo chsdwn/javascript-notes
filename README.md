@@ -2356,3 +2356,55 @@ const puma = {
 // It shows "user" because its copied from admin.
 console.log(puma.greet()); // "User"
 ```
+
+### 03. Static Properties and Methods
+
+```js
+class User {
+  static staticMethod() {
+    return this === User
+  }
+}
+console.log(Object.getOwnPropertyNames(User)); // ["length", "name", "prototype", "staticMethod"]
+console.log(User.staticMethod()); // true
+
+
+class Admin {}
+Admin.staticMethod = function() {
+  return this === Admin;
+}
+console.log(Object.getOwnPropertyNames(Admin)); // ["length", "name", "prototype", "staticMethod"]
+console.log(Admin.staticMethod()); // true
+
+const admin = new Admin();
+admin.staticMethod(); // Error: admin.staticMethod is not a function
+```
+
+#### Static properties
+
+```js
+class User {
+  static age = 20
+}
+console.log(Object.getOwnPropertyNames(User)); // ["length", "name", "prototype", "age"]
+console.log(User.age); // 20
+```
+
+#### Inheritance of static properties and methods
+
+```js
+class User {
+  static greet(name) {
+    return `Hi, ${name}!`;
+  }
+}
+class Admin extends User {}
+
+// inherits static methods
+console.log(Admin.__proto__ === User); // true
+// inherits regular methods
+console.log(Admin.prototype.__proto__ === User.prototype); // true
+
+const admin = new Admin();
+console.log(admin.__proto__ === Admin.prototype); // true
+```
