@@ -2408,3 +2408,240 @@ console.log(Admin.prototype.__proto__ === User.prototype); // true
 const admin = new Admin();
 console.log(admin.__proto__ === Admin.prototype); // true
 ```
+
+### 04. Private and Protected Properties and Methods
+
+```js
+class User {
+  #age = 0;
+  #controlAge(value) {
+    if (value < 0) return 0;
+    return value;
+  }
+
+  showAge() {
+    // private fields cannot be accessible as 'this[key]'
+    return `Age: ${this['#age']}`;
+  }
+}
+
+const user = new User();
+user.#age = 100; // Error
+user.#controlAge(20); // Error
+console.log(user.showAge()); // "Age: undefined"
+
+class Admin extends User {
+  printAge() {
+    // #age is only accessible inside User
+    console.log(this.#age); // Error
+  }
+}
+```
+
+### 05. Extending Built-in Classes
+
+```js
+class ExtendedArray extends Array {
+  get isEmpty() {
+    return this.length === 0;
+  }
+}
+let arr = new ExtendedArray(1, 2, 3);
+console.log(arr.isEmpty); // false
+
+// Built-in methods like 'map', 'filter' return inherited type
+arr = arr.filter((n) => n > 1);
+console.log(arr.constructor === ExtendedArray); // true
+```
+```js
+class ExtendedArray extends Array {
+  get isEmpty() {
+    return this.length === 0;
+  }
+
+  static get [Symbol.species]() {
+    return Array;
+  }
+}
+
+let arr = new ExtendedArray(1, 2, 3);
+arr = arr.filter((n) => n > 1);
+console.log(arr.constructor === ExtendedArray); // false
+// arr is Array not ExtendedArray
+console.log(arr.isEmpty); // undefined
+```
+
+#### No static inheritance in built-ins
+
+- Built-in classes don't inherit statics from each other.
+
+```js
+// does not inherit static methods
+console.log(Array.__proto__ === Object); // false
+// inherits regular methods
+console.log(Array.prototype.__proto__ === Object.prototype); // true
+
+console.log(typeof Object.keys); // function
+console.log(typeof Array.keys); // undefined
+```
+
+### 06. Class Checking: `instanceof`
+
+#### The `instanceof` operator
+
+```js
+class User {}
+const user = new User;
+console.log(user instanceof User); // true
+
+function Admin() {}
+console.log(new Admin() instanceof Admin); // true
+
+const arr = [1, 2, 3];
+console.log(arr instanceof Array); // true
+console.log(arr instanceof Object); // true
+```
+
+#### The algorithm of `obj instanceof Class`
+
+1. If there's a static method `Symbol.hasIntance` runs it.
+
+```js
+class Adult {
+  static [Symbol.hasInstance](obj) {
+    return obj.age >= 18;
+  }
+}
+console.log({ age: 10 } instanceof Adult); // false
+console.log({ age: 20 } instanceof Adult); // true
+```
+
+2. Checks whether `Class.prototype` is equal to one of the prototypes in the `obj` prototype chain.
+
+```js
+class User {}
+class Admin extends User {}
+
+const admin = new Admin();
+console.log(admin instanceof User); // true
+console.log(admin instanceof Object); // true
+
+console.log(admin.__proto__ === User.prototype); // false
+console.log(admin.__proto__.__proto__ === User.prototype); // true
+console.log(User.prototype.isPrototypeOf(admin)); // true
+console.log(admin.__proto__.__proto__.__proto__ === Object.prototype); // true
+```
+
+#### Bonus: `Object.prototype.toString` for the type
+
+```js
+const objectToString = Object.prototype.toString;
+
+const obj = {};
+const arr = [];
+const set = new Set();
+const map = new Map();
+const date = new Date();
+console.log(objectToString.call(obj)); // "[object Object]"
+console.log(objectToString.call(arr)); // "[object Array]"
+console.log(objectToString.call(set)); // "[object Set]"
+console.log(objectToString.call(map)); // "[object Map]"
+console.log(objectToString.call(date)); // "[object Date]"
+
+const num = 0;
+const str = "";
+const bool = false;
+const und = undefined;
+const nll = null;
+const bigint = 1n;
+const symbol = Symbol();
+console.log(objectToString.call(num)); // "[object Number]"
+console.log(objectToString.call(str)); // "[object String]"
+console.log(objectToString.call(bool)); // "[object Boolean]"
+console.log(objectToString.call(und)); // "[object Undefined]"
+console.log(objectToString.call(nll)); // "[object Null]"
+console.log(objectToString.call(bigint)); // "[object BigInt]"
+console.log(objectToString.call(symbol)); // "[object Symbol]"
+```
+
+#### `Symbol.toStringTag`
+
+```js
+const user = {
+  [Symbol.toStringTag]: "User"
+}
+console.log({}.toString.call(user)); // "[object User]"
+```
+
+### 07. Mixins
+
+- Only one single object can be inherited. One `[[Prototype]]` per object. A Class can be extend only one other class.
+
+#### A mixin example
+
+```js
+const greetMixin = {
+  greet(name) {
+    return `Hi, ${name}!`
+  },
+};
+
+const greetFarewellMixin = {
+  __proto__: greetMixin,
+  greet() {
+    return `${super.greet(this.name)} Welcome!`;
+  },
+  farewell() {
+    return `Goodbye, ${this.name}.`;
+  },
+};
+
+class User {
+  constructor(name) {
+    this.name = name;
+  }
+}
+
+Object.assign(User.prototype, greetFarewellMixin);
+
+const ali = new User("Ali");
+console.log(ali.greet()); // "Hi, Ali! Welcome!"
+console.log(ali.farewell()); // "Goodbye, Ali."
+```
+
+#### EventMixin
+
+```js
+const eventMixin = {
+  on(eventName, handler) {
+    if (!this._eventHandlers) this._eventHandlers = {};
+    if (!this._eventHandlers[eventName]) this._eventHandlers[eventName] = [];
+    this._eventHandlers[eventName].push(handler);
+  },
+  off(eventName, handler) {
+    const handlers = this._eventHandlers?.[eventName];
+    if (!handlers) return;
+    for (let i = 0;  i < handlers.length; i++) {
+      if (handlers[i] === handler) handlers.splice(i--, 1);
+    }
+  },
+  trigger(eventName, ...args) {
+    if (!this._eventHandlers?.[eventName]) return;
+    this._eventHandlers[eventName].forEach(handler => handler.apply(this, args));
+  },
+};
+
+class Menu {
+  choose(value) {
+    console.log(value)
+    this.trigger("select", value);
+  }
+}
+Object.assign(Menu.prototype, eventMixin);
+
+const menu = new Menu();
+menu.on("select", (value) => {
+  console.log(`Value: ${value}`); // "Value: 123"
+});
+menu.choose("123");
+```
