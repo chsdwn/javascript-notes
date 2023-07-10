@@ -29,6 +29,7 @@ console.log(typeof []); // object
   - function: `function() {}`
   - set: `new Set(["a", 1])`
   - map: `new Map([["name", "Ali"]])`
+  - date: `new Date()`
 
 ### 07. Type Conversions
 
@@ -2539,11 +2540,13 @@ const objectToString = Object.prototype.toString;
 
 const obj = {};
 const arr = [];
+const fn = () => {};
 const set = new Set();
 const map = new Map();
 const date = new Date();
 console.log(objectToString.call(obj)); // "[object Object]"
 console.log(objectToString.call(arr)); // "[object Array]"
+console.log(objectToString.call(fn)); // "[object Function]"
 console.log(objectToString.call(set)); // "[object Set]"
 console.log(objectToString.call(map)); // "[object Map]"
 console.log(objectToString.call(date)); // "[object Date]"
