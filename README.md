@@ -2680,6 +2680,8 @@ try {
 
 #### Global catch
 
+##### Browser
+
 ```js
 window.onerror = (message, url, line, col, error) => {
   console.log(message); // "Uncaught ReferenceError: fn is not defined"
@@ -2687,6 +2689,18 @@ window.onerror = (message, url, line, col, error) => {
   console.log(line); // 8
   console.log(col); // 1
 };
+
+fn();
+```
+
+##### Node.js
+
+```js
+process.on('uncaughtException', (error, origin) => {
+  console.log(error.name); // "ReferenceError"
+  console.log(error.message); // "fn is not defined"
+  console.log(origin); // "uncaughtException"
+});
 
 fn();
 ```
