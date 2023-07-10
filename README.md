@@ -2645,3 +2645,70 @@ menu.on("select", (value) => {
 });
 menu.choose("123");
 ```
+
+## 09. Error Handling
+
+### 01. Error Handling, `try...catch`
+
+#### Error object
+
+```js
+try {
+  console.log("1st line"); // "1st line"
+  fn();
+  console.log("3rd line");
+} catch (error) {
+  console.log(error.name); // "ReferenceError"
+  console.log(error.message); // "fn is not defined"
+  console.log(error.stack); // "ReferenceError: fn is not defined..."
+}
+```
+
+#### `try...catch...finally`
+
+```js
+try {
+  return console.log("return"); // "return"
+  console.log("2nd line");
+} finally {
+  console.log("finally"); // "finally"
+}
+```
+
+#### Global catch
+
+```js
+window.onerror = (message, url, line, col, error) => {
+  console.log(message); // "Uncaught ReferenceError: fn is not defined"
+  console.log(url); // "/index.html"
+  console.log(line); // 8
+  console.log(col); // 1
+};
+
+fn();
+```
+
+### 02. Custom Errors, Extending Error
+
+#### Extending Error
+
+```js
+class ValidationError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = this.constructor.name;
+  }
+}
+
+try {
+  throw new ValidationError("Invalid data");
+} catch (error) {
+    if (error instanceof ValidationError) {
+    console.log(error.name); // "ValidationError"
+    console.log(error.message); // "Invalid data"
+  } else {
+    // rethrow unknown error
+    throw error;
+  }
+}
+```
