@@ -2544,12 +2544,15 @@ const fn = () => {};
 const set = new Set();
 const map = new Map();
 const date = new Date();
+function* generator() {}
 console.log(objectToString.call(obj)); // "[object Object]"
 console.log(objectToString.call(arr)); // "[object Array]"
 console.log(objectToString.call(fn)); // "[object Function]"
 console.log(objectToString.call(set)); // "[object Set]"
 console.log(objectToString.call(map)); // "[object Map]"
 console.log(objectToString.call(date)); // "[object Date]"
+console.log(objectToString.call(generator)); // "[object GeneratorFunction]"
+console.log(objectToString.call(generator())); // "[object Generator]"
 
 const num = 0;
 const str = "";
