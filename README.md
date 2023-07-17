@@ -2729,3 +2729,260 @@ try {
   }
 }
 ```
+
+## 10. Promise, `async`/`await`
+
+### 02. Promise
+
+```js
+const result = new Promise((resolve, reject) => {
+  resolve(123);
+
+  resolve(456); // ignored
+  reject(new Error('An error occured')); // ignored
+});
+
+result
+  .finally(() => console.log("finally")) // 1st: "finally"
+  .then(
+    (value) => {
+      console.log(value); // 2nd: 123
+      throw new Error('Throw error');
+    },
+    (error) => console.log(error), // can't catch "Throw error"
+  )
+  .catch((error) => console.log(error.message)); // 3rd: "Throw error"
+```
+
+### 03. Promise Chaining
+
+```js
+const result = new Promise((resolve) => resolve(2))
+  .then((num) => {
+    console.log(num); // 2
+    return num * 2;
+  })
+  .then((num) => {
+    console.log(num); // 4
+    return new Promise((resolve) => resolve(num * 2));
+  })
+  .then((num) => {
+    console.log(num); // 8
+    return num * 2;
+  });
+
+result.then((num) => console.log(num)); // 16
+result.then((num) => console.log(num)); // 16
+```
+
+### 04. Error Handling with Promises
+
+#### Implicit try...catch
+
+```js
+new Promise((_, reject) => {
+  // throw new Error("Rejected"); // same as below
+  reject(new Error("Rejected"));
+}).catch((error) => console.log(error.message)); // "Rejected"
+```
+
+#### Rethrowing
+
+```js
+new Promise(() => { throw new Error("Rejected"); })
+  .catch((error) => console.log(error.message)) // "Rejected"
+  .then(() => console.log("Executed successfully")); // "Executed successfully"
+```
+
+#### Unhandled rejections
+
+##### Browser
+
+```js
+window.addEventListener("unhandledrejection", (event) => {
+  console.log(event.promise); // "[object Promise]"
+  console.log(event.reason); // "Error: Rejected"
+});
+
+new Promise(() => { throw new Error("Rejected"); });
+```
+
+##### Node.js
+
+```js
+process.on("unhandledRejection", (reason, promise) => {
+  console.log(promise); // "[object Promise]"
+  console.log(reason); // "Error: Rejected"
+});
+
+new Promise(() => { throw new Error("Rejected"); });
+```
+
+### 05. Promise API
+
+#### `Promise.all`
+
+```js
+Promise.all([
+  1,
+  new Promise((resolve) => resolve(2)),
+  3
+]).then((result) => console.log(result)); // [1, 2, 3]
+
+Promise.all([
+  1,
+  new Promise((_, reject) => reject(new Error("Rejected"))),
+  3
+])
+  .then((result) => console.log(result))
+  .catch((error) => console.log(error.message)); // "Rejected"
+```
+
+#### `Promise.allSettled`
+
+```js
+Promise.allSettled([
+  1,
+  new Promise((resolve) => resolve(2)),
+  3
+]).then((result) => console.log(result));
+/*
+  [
+    { status: 'fulfilled', value: 1 },
+    { status: 'fulfilled', value: 2 },
+    { status: 'fulfilled', value: 3 },
+  ]
+ */
+
+Promise.allSettled([
+  1,
+  new Promise((_, reject) => reject(new Error("Rejected"))),
+  3
+]).then((result) => console.log(result));
+/*
+  [
+    { status: 'fulfilled', value: 1 },
+    { status: 'rejected', reason: [Error: Rejected] },
+    { status: 'fulfilled', value: 3 },
+  ]
+*/
+```
+
+#### `Promise.race`
+
+```js
+Promise.race([
+  new Promise((_, reject) => setTimeout(() => reject(new Error("Rejected")), 3000)),
+  new Promise((resolve) => setTimeout(() => resolve(2), 1000)),
+  new Promise((resolve) => setTimeout(() => resolve(3), 2000)),
+]).then((result) => console.log(result)); // 2
+```
+
+#### `Promise.any`
+
+```js
+Promise.any([
+  new Promise((_, reject) => setTimeout(() => reject(new Error("Rejected")), 1000)),
+  new Promise((resolve) => setTimeout(() => resolve(2), 2000)),
+  new Promise((resolve) => setTimeout(() => resolve(3), 3000)),
+]).then((result) => console.log(result)); // 2
+
+Promise.any([
+  new Promise((_, reject) => setTimeout(() => reject(new Error("Rejected")), 1000)),
+  new Promise((_, reject) => setTimeout(() => reject(new Error("Rejected 2")), 2000)),
+]).catch((error) => {
+  console.log(error.constructor.name); // "AggregateError"
+  console.log(error.message); // "All promises were rejected"
+  for (const { message } of error.errors) {
+    console.log(message); // "Rejected", "Rejected 2"
+  }
+});
+```
+
+#### `Promise.resolve`/`reject`
+
+```js
+Promise.resolve(1).then((result) => console.log(result)); // 1
+
+Promise.reject(new Error("Rejected"))
+  .catch((error) => console.log(error.message)); // "Rejected"
+```
+
+### 06. Promisification
+
+#### Browser
+
+```js
+const greet = (name, callback) => {
+  callback(null, `Hi, ${name}!`)
+}
+
+const promisify = (fn) => {
+  return function(...args) {
+    return new Promise((resolve, reject) => {
+      const callback = (err, ...res) => {
+        if (err) reject(err);
+        else resolve(res.length === 1 ? res[0] : res);
+      }
+      fn.apply(this, [...args, callback]);
+    })
+  }
+}
+const greetPromise = promisify(greet);
+greetPromise("Ali").then((message) => console.log(message)); // "Hi, Ali!"
+```
+
+#### Node.js
+
+```js
+const greet = (name, callback) => {
+  callback(null, `Hi, ${name}!`)
+}
+
+const { promisify } = require("util");
+const greetPromise = promisify(greet);
+greetPromise("Ali").then((message) => console.log(message)); // "Hi, Ali!"
+```
+
+### 07. Microtasks
+
+```js
+Promise.resolve()
+  .then(() => console.log("2nd")) // "2nd"
+  .then(() => console.log("4th")); // "4th"
+
+console.log("1st"); // "1st"
+
+setTimeout(() => console.log("6th"), 0); // "6th"
+
+Promise.resolve()
+  .then(() => console.log("3rd")) // "3rd"
+  .then(() => console.log("5th")); // "5th"
+```
+
+### 08. `async`/`await`
+
+#### [Implementing async/await](https://wanago.io/2018/04/23/demystifying-generators-implementing-async-await/)
+```js
+const sumAsync = (x, y) =>
+  new Promise((resolve) => setTimeout(() => resolve(x + y), 100));
+const res = await sumAsync(1, 2);
+console.log(res); // 3
+
+const run = (generatorFunction) => {
+  const iterator = generatorFunction();
+  const handleNext = (value) => {
+    const next = iterator.next(value);
+    if (next.done) return next.value;
+
+    return Promise.resolve(next.value).then(handleNext, (err) =>
+      Promise.resolve(iterator.throw(err)).then(handleNext)
+    );
+  };
+  handleNext();
+};
+run(function* () {
+  const res = yield sumAsync(1, 2);
+  console.log(res); // 3
+});
+```
