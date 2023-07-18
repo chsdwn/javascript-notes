@@ -2989,3 +2989,203 @@ run(function* () {
   console.log(res); // 3
 });
 ```
+
+## 11. Generators, Advanced Iteration
+
+### 01. Generators
+
+#### Generator functions
+
+```js
+function* generateSquence() {
+  yield 1;
+  yield 2;
+  return 3;
+}
+
+const generator = generateSquence();
+console.log(generator.next()); // { value: 1, done: false }
+console.log(generator.next()); // { value: 2, done: false }
+console.log(generator.next()); // { value: 3, done: true }
+console.log(generator.next()); // { value: undefined, done: true }
+```
+
+#### Generators are iterable
+
+```js
+function* generateSquence() {
+  yield 1;
+  yield 2;
+  return 3;
+}
+
+const generator = generateSquence();
+for (const value of generator) console.log(value); // 1, 2
+
+console.log([0, ...generateSquence()]); // [0, 1, 2]
+```
+
+#### Using generators for iterables
+
+```js
+const range = {
+  from: 1,
+  to: 3,
+
+  *[Symbol.iterator]() {
+    for (let value = this.from; value <= this.to; value++) {
+      yield value;
+    }
+  }
+};
+
+console.log([...range]); // [1, 2, 3]
+```
+
+#### Generator composition
+
+```js
+function* generateSequence(from, to) {
+  for (let i = from; i <= to; i++) yield i;
+}
+
+function* generatePasswordCodes() {
+  // 0..9
+  yield* generateSequence(48, 57);
+
+  // A..Z
+  yield* generateSequence(65, 90);
+
+  // a..z
+  yield* generateSequence(97, 122);
+}
+
+const str = [...generatePasswordCodes()].reduce(
+  (acc, curr) => (acc += String.fromCharCode(curr)),
+  ""
+);
+console.log(str);
+// "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+```
+
+#### `yield` is a two-way street
+
+```js
+function* generate() {
+  const sum = yield "2 + 2 = ?";
+  yield `${sum} * ${sum} = ?`;
+}
+
+const generator = generate();
+console.log(generator.next().value); // "2 + 2 = ?"
+console.log(generator.next(4).value); // "4 * 4 = ?"
+console.log(generator.next()); // { value: undefined, done: true }
+```
+
+#### `generator.throw`
+
+```js
+function* generate() {
+  try {
+    const sum = yield "2 + 2 = ?";
+    console.log(sum);
+  } catch (error) {
+    console.log(error.message); // "error message"
+  }
+}
+
+const generator = generate();
+console.log(generator.next().value); // "2 + 2 = ?"
+generator.throw(new Error("error message"));
+```
+```js
+function* generate() {
+  const sum = yield "2 + 2 = ?";
+  console.log(sum);
+}
+
+const generator = generate();
+console.log(generator.next().value); // "2 + 2 = ?"
+try {
+  generator.throw(new Error("error message"));
+} catch (error) {
+  console.log(error.message); // "error message"
+}
+```
+
+#### `generator.return`
+
+```js
+function* generate() {
+  yield 1;
+  yield 2;
+  yield 3;
+}
+
+const generator = generate();
+console.log(generator.next()); // { value: 1, done: false }
+console.log(generator.return("abc")); // { value: "abc", done: true }
+console.log(generator.next()); // { value: undefined, done: true }
+```
+
+### 02. Async Iteration and Generators
+
+#### Async iterables
+
+```js
+const range = {
+  from: 1,
+  to: 3,
+
+  [Symbol.asyncIterator]() {
+    return {
+      current: this.from,
+      last: this.to,
+
+      async next() {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        if (this.current <= this.last) {
+          return { done: false, value: this.current++ };
+        } else {
+          return { done: true };
+        }
+      }
+    };
+  },
+};
+
+for await (const value of range) console.log(value); // 1, 2, 3
+```
+
+#### Async generators
+
+```js
+async function* generate(from, to) {
+  for (let i = from; i <= to; i++) {
+    await Promise.resolve(setTimeout(() => {}, 100));
+    yield i;
+  }
+}
+
+const generator = generate(1, 3);
+for await (const value of generator) console.log(value); // 1, 2, 3
+```
+
+#### Async iterable range
+
+```js
+const range = {
+  from: 1,
+  to: 3,
+
+  async *[Symbol.asyncIterator]() {
+    for (let value = this.from; value <= this.to; value++) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      yield value;
+    }
+  },
+};
+
+for await (const value of range) console.log(value); // 1, 2, 3
+```
