@@ -3189,3 +3189,71 @@ const range = {
 
 for await (const value of range) console.log(value); // 1, 2, 3
 ```
+
+## 12. Modules
+
+### 01. Modules, Introduction
+
+#### Core module features
+
+```html
+<script>
+  console.log(this); // window object
+</script>
+
+<script type="module">
+  // "use strict" // pre defined
+  name = "Ali"; // Error: name is not defined
+
+  console.log(this); // undefined
+</script>
+```
+
+##### A module code is evaluated only the first time when imported
+
+- `user.js`
+```js
+export const user = {
+  name: "Ali",
+};
+```
+
+- `a.js`
+```js
+import { user } from "user.js";
+user.name = "Veli";
+```
+
+- `b.js`
+```js
+import { user } from "user.js";
+console.log(user.name); // "Veli"
+```
+
+##### `import.meta`
+
+```html
+<script type="module">
+  console.log(import.meta.url); // the URL of the current HTML page
+</script>
+```
+
+### 03. Dynamic Imports
+
+- `index.js`
+```js
+export const greet = () => console.log("Hi");
+export default () => console.log("Bye");
+```
+
+- `ìndex.html`
+```html
+<!-- Dynamic imports work in regular scripts too -->
+<script>
+  const load = async () => {
+    const module = await import("./index.js");
+    module.greet(); // "Hi"
+    module.default(); // "Bye"
+  }
+</script>
+```
