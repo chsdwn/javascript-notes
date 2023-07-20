@@ -3257,3 +3257,286 @@ export default () => console.log("Bye");
   }
 </script>
 ```
+
+## 13. Miscellaneous
+
+### 01. Proxy and Reflect
+
+#### Proxy
+
+##### `[[Get]]`
+
+```js
+const user = { name: "Ali" };
+const proxy = new Proxy(user, {
+  get(target, prop, _receiver) {
+    const value = target[prop];
+    if (prop === "name") return `My name is ${value}`;
+    return value;
+  },
+});
+console.log(proxy.name); // "My name is Ali"
+```
+
+##### `[[Set]]`
+
+```js
+const age = { value: 20 };
+const proxy = new Proxy(age, {
+  set(target, prop, value, _receiver) {
+    if (typeof value === "number") {
+      target[prop] = value;
+      return true;
+    }
+    return false;
+  },
+});
+proxy.value = "Ali";
+console.log(proxy.value); // 20
+```
+
+##### `[[HasProperty]]`
+
+```js
+const obj = { _id: 1 };
+const proxy = new Proxy(obj, {
+  has(target, prop) {
+    if (!target.hasOwnProperty(prop)) return false;
+    if (prop.startsWith("_")) return false;
+    return true;
+  },
+});
+console.log("_id" in proxy); // false
+```
+
+##### `[[Delete]]`
+
+```js
+const obj = { _id: 1 };
+const proxy = new Proxy(obj, {
+  deleteProperty(target, prop) {
+    if (prop.startsWith("_")) return false;
+    delete target[prop];
+    return true;
+  },
+});
+console.log(delete proxy._id); // false
+console.log(proxy._id); // 1
+```
+
+##### `[[Call]]`
+
+```js
+const greet = (name) => `Hi, ${name}!`;
+const greetProxy = new Proxy(greet, {
+  apply(target, thisArg, args) {
+    const [name] = args;
+    return target.apply(thisArg, [`my name is ${name}`]);
+  },
+});
+console.log(greetProxy("Ali")); // "Hi, my name is Ali!"
+```
+
+##### `[[Construct]]`
+
+```js
+function User(name) {
+  this.name = name;
+}
+const UserProxy = new Proxy(User, {
+  construct(target, args, _newTarget) {
+    const [name] = args;
+    return new target(`My name is ${name}.`);
+  },
+});
+const user = new UserProxy("Ali");
+console.log(user.name); // "My name is Ali."
+```
+
+##### `[[GetPrototypeOf]]`
+
+```js
+const obj = {};
+const proxy = new Proxy(obj, {
+  getPrototypeOf(_target, _handler) {
+    return { name: "Ali" };
+  },
+});
+console.log(Object.getPrototypeOf(proxy)); // { name: "Ali" }
+```
+
+##### `[[SetPrototypeOf]]`
+
+```js
+const proto = { _id: 1 };
+const obj = { __proto__: proto };
+const proxy = new Proxy(obj, {
+  setPrototypeOf(_target, value) {
+    Object.assign(proto, value);
+    return true;
+  },
+});
+console.log(Object.setPrototypeOf(proxy, { name: "Ali" }));
+console.log(Object.getPrototypeOf(proxy)); // { _id: 1, name: "Ali" }
+```
+
+##### `[[IsExtensible]]`
+
+```js
+const obj = {};
+Object.preventExtensions(obj);
+const proxy = new Proxy(obj, {
+  isExtensible(target) {
+    return Reflect.isExtensible(target);
+  },
+});
+console.log(Object.isExtensible(proxy)); // false
+```
+
+##### `[[PreventExtensions]]`
+
+```js
+const user = { name: "" };
+const proxy = new Proxy(user, {
+  preventExtensions(target) {
+    target.name = "Ali";
+    Object.preventExtensions(target);
+    return true;
+  },
+});
+console.log(proxy); // { name: "" }
+Object.preventExtensions(proxy);
+console.log(proxy); // { name: "Ali" }
+console.log(Object.isExtensible(proxy)); // false
+```
+
+##### `[[DefineOwnProperty]]`
+
+```js
+const user = { name: "" };
+const proxy = new Proxy(user, {
+  defineProperty(target, prop, descriptor) {
+    if (prop === "name") target.name = `My name is ${descriptor.value}`;
+    else target[prop] = descriptor.value;
+    return true;
+  },
+});
+
+proxy.name = "Ali";
+console.log(proxy.name); // "My name is Ali"
+
+Object.defineProperties(proxy, { age: { value: 20 } });
+console.log(proxy.age); // 20
+```
+
+##### `[[GetOwnProperty]]`
+
+```js
+const obj = {};
+const proxy = new Proxy(obj, {
+  getOwnPropertyDescriptor(_target, _prop) {
+    return { configurable: true, value: "Ali" };
+  },
+});
+console.log(Object.getOwnPropertyDescriptor(proxy, "name"));
+// { value: "Ali", writable: false, enumerable: false, configurable: true }
+```
+
+##### `[[OwnPropertyKeys]]`
+
+```js
+const obj = {};
+const proxy = new Proxy(obj, {
+  ownKeys(_target) {
+    return ["name", "age", Symbol("id")];
+  },
+});
+console.log(Object.getOwnPropertyNames(proxy)); // ["name", "age"]
+console.log(Object.getOwnPropertySymbols(proxy)); // [Symbol(id)]
+```
+
+#### Reflect
+
+- `Reflect`: is a built-in object that simplifies creation of `Proxy`.
+
+```js
+const user = {
+  _name: "User",
+  get name() {
+    return this._name;
+  },
+};
+const userProxy = new Proxy(user, {
+  get(target, prop, receiver) {
+    console.log(target === user); // true
+    console.log(target[prop]); // "User"
+    return Reflect.get(target, prop, receiver);
+  },
+});
+
+const admin = {
+  __proto__: userProxy,
+  _name: "Admin",
+};
+console.log(admin.name); // "Admin"
+```
+
+#### Proxy limitations
+
+##### Built-in objects: Internal slots
+
+```js
+const map = new Map();
+const proxy = new Proxy(map, {
+  get(target, prop, receiver) {
+    const value = Reflect.get(target, prop, receiver);
+    return typeof value === "function" ? value.bind(target) : value;
+  },
+});
+
+proxy.set("name", "Ali");
+console.log(proxy.get("name")); // "Ali"
+```
+
+##### Private fields
+
+```js
+class User {
+  #name = "Ali";
+  getName() {
+    return this.#name;
+  }
+}
+
+let user = new User();
+user = new Proxy(user, {
+  get(target, prop, receiver) {
+    const value = Reflect.get(target, prop, receiver);
+    return typeof value === "function" ? value.bind(target) : value;
+  },
+});
+console.log(user.getName()); // "Ali"
+```
+
+##### Proxy != target
+
+```js
+const user = {};
+const proxy = new Proxy(user, {});
+console.log(user === proxy); // false
+```
+
+#### Revocable proxies
+
+```js
+const user = { name: "Ali" };
+const { proxy, revoke } = Proxy.revocable(user, {
+  get() {
+    return "Veli";
+  },
+});
+
+console.log(proxy.name); // "Ali"
+revoke();
+console.log(proxy.name); // Error: Cannot perform 'get' on a proxy that has been revoked
+```
