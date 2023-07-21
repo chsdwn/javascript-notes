@@ -3573,3 +3573,27 @@ console.log(curriedSum(1, 2, 3)); // 6
 console.log(curriedSum(1)(2)(3)); // 6
 console.log(curriedSum(1)(2, 3)); // 6
 ```
+
+### 04. Reference Type
+
+- The Reference Type is a "specification type". We can't explicitly use it, but it is used internally by the language.
+- The value of Reference Type: `(base, name, strict)`
+  - `base`: object
+  - `name`: property name
+  - `strict`: true if `use strict` is in effect
+
+```js
+const user = {
+  name: "Ali",
+  greet() {
+    return `Hi, ${this.name}!`;
+  },
+};
+
+// # Reference Type value
+// `(user, "greet", false)`
+console.log(user.greet()); // "Hi, Ali!"
+
+const greet = user.greet;
+console.log(greet()); // "Hi, undefined!"
+```
