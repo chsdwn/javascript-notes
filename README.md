@@ -3549,3 +3549,27 @@ eval('name = "Veli"; const age = 20;');
 console.log(name); // "Veli"
 console.log(age); // Error: age is not defined
 ```
+
+### 03. Currying
+
+- Currying: is a transformation of functions that translates a function from callable as `f(a, b, c)` into callable as `f(a)(b)(c)`.
+
+```js
+const sum = (x, y, z) => x + y + z;
+
+const curry = (fn) => {
+  return function curried(...args) {
+    if (args.length >= fn.length) {
+      return fn.apply(this, args);
+    }
+    return function(...args2) {
+      return curried.apply(this, args.concat(args2));
+    }
+  }
+}
+
+const curriedSum = curry(sum);
+console.log(curriedSum(1, 2, 3)); // 6
+console.log(curriedSum(1)(2)(3)); // 6
+console.log(curriedSum(1)(2, 3)); // 6
+```
