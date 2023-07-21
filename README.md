@@ -3637,3 +3637,40 @@ if (0n) console.log(true);
 console.log(1n || 2); // 1n
 console.log(0n || 2); // 2
 ```
+
+### 06. Unicode, String Internals
+
+```js
+console.log("\x7A"); // "z"
+console.log("\xA9"); // "©"
+console.log("\u00A9"); // "©"
+console.log("\u{1F60D}"); // "😍"
+```
+
+#### Surrogate pairs
+
+```js
+const emoji = "😍";
+console.log(emoji.length); // 2
+console.log(emoji[0]); // "#": invalid character
+
+// # `charCodeAt` is not surrogate-pair aware
+console.log(emoji.charCodeAt(0).toString(16)); // "d83d"
+console.log(String.fromCharCode(Number.parseInt("d83d", 16))); // "#": invalid character
+
+// # `codePointAt` is surrogate-pair aware
+console.log(emoji.codePointAt(0).toString(16)); // "1f60d"
+console.log(String.fromCodePoint(Number.parseInt("1f60d", 16))); // "😍"
+```
+
+#### Diacritical marks and normalization
+
+```js
+const s1 = "S\u0307\u0323"; // Ṩ: S + dot above + dot below
+const s2 = "S\u0323\u0307"; // Ṩ: S + dot below + dot above
+
+console.log(s1 == s2); // false
+console.log(s1.normalize() === s2.normalize()); // true
+console.log(s1.normalize().length); // 1
+console.log(s1.normalize() === "\u1e68"); // true
+```
