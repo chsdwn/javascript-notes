@@ -3597,3 +3597,43 @@ console.log(user.greet()); // "Hi, Ali!"
 const greet = user.greet;
 console.log(greet()); // "Hi, undefined!"
 ```
+
+### 05. `BigInt`
+
+#### Math operators
+
+```js
+const sum = 1n + 2n;
+console.log(sum); // 3n
+
+const divide = 5n / 2n;
+console.log(divide); // 2n
+
+const sumBigInt = 1n + BigInt(2);
+console.log(sumBigInt); // 3n
+
+const sumNumber = Number(1n) + 2;
+console.log(sumNumber); // 3
+
+// # The unary plus is not supperted on BigInts
+console.log(+1n); // Error: Cannot convert a BigInt value to a number
+```
+
+#### Comparisons
+
+```js
+console.log(2n > 1); // true
+console.log(2 > 1n); // true
+
+console.log(1 == 1n); // true
+console.log(1 === 1n); // false
+```
+
+#### Boolean operations
+
+```js
+if (0n) console.log(true);
+
+console.log(1n || 2); // 1n
+console.log(0n || 2); // 2
+```
