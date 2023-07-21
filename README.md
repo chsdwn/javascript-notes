@@ -3540,3 +3540,12 @@ console.log(proxy.name); // "Ali"
 revoke();
 console.log(proxy.name); // Error: Cannot perform 'get' on a proxy that has been revoked
 ```
+
+### 02. Eval: Run a Code String
+
+```js
+let name = "Ali";
+eval('name = "Veli"; const age = 20;');
+console.log(name); // "Veli"
+console.log(age); // Error: age is not defined
+```
